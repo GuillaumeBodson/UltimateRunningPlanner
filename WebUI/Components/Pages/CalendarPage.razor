@@ -60,9 +60,9 @@
     }
     private async void PlanningSave((DateOnly date, CalendarEvent ev) args)
     {
-        var wornkout = _planning.BaseWorkouts!.FirstOrDefault(w => w.Id == args.ev.Id);
+        var workout = _planning.BaseWorkouts!.FirstOrDefault(w => w.Id == args.ev.Id);
         var weekNumber = GetWeekNumber(args.ev.Date);
-        wornkout!.WeekNumber = weekNumber;
+        workout!.WeekNumber = weekNumber;
 
         var plannedWorkout = _planning.Workouts.FirstOrDefault(w => w.Id == args.ev.Id);
         plannedWorkout!.WeekNumber = weekNumber;
