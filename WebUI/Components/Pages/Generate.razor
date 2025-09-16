@@ -35,20 +35,12 @@
     {
         if (!firstRender) return;
 
-        try
+        var fromStorage = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
+        if (fromStorage is not null)
         {
-            var fromStorage = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
-            if (fromStorage is not null)
-            {
-                Workouts = fromStorage.BaseWorkouts
-                    .Where(w => w.Repetitions > 0)
-                    .ToList();
-            }
-        }
-        catch (Exception ex)
-        {
-            
-            throw;
+            Workouts = fromStorage.BaseWorkouts
+                .Where(w => w.Repetitions > 0)
+                .ToList();
         }
         
 
