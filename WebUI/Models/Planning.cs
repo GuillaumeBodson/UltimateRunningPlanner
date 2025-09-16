@@ -1,7 +1,7 @@
 ﻿using GarminRunerz.Workout.Services.Models;
 using System.MudPlanner;
 using System.Text.Json.Serialization;
-using Utils.Miscellaneous;
+using Toolbox.Utilities;
 
 namespace WebUI.Models;
 

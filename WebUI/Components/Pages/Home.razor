@@ -1,7 +1,186 @@
 ﻿@page "/"
+@using FluentValidation
+@using WebUI.Models
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IAthleteSession AthleteSession
+@inject ISnackbar Snackbar
+@rendermode InteractiveServer
+@using MudBlazor
+@using WebUI.Services
+@using WebUI.Validators
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Athlete</PageTitle>
 
-<h1>Hello, world!</h1>
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Athlete Management</MudText> 
+    <MudDivider Class="mb-4" />
 
-Welcome to your new app.
+    <MudPaper Class="p-4">
+        <MudForm @ref="_form" Model="@_athleteForm" OnValidSubmit="SaveAsync">
+            <MudGrid Class="mb-2" GutterSize="GutterSize.Small">
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="Easy Pace"
+                                     Value="_athleteForm.EasyPace" ValueChanged="OnEasyPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="Marathon Pace" 
+                                     Value="_athleteForm.MarathonPace" ValueChanged="OnMarathonPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="Semi-Marathon Pace"
+                                     Value="_athleteForm.SemiMarathonPace" ValueChanged="OnSemiMarathonPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="VMA Pace"
+                                     Value="_athleteForm.VmaPace" ValueChanged="OnVmaPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+            </MudGrid>
+
+            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                <MudButton ButtonType="ButtonType.Submit" OnClick="SaveAsync" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">
+                    Save
+                </MudButton>
+                <MudButton OnClick="ResetAsync" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Restore">
+                    Reset
+                </MudButton>
+                <MudSpacer />
+                <MudButton OnClick="ClearStorageAsync" Color="Color.Error" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.DeleteForever">
+                    Clear Stored Data
+                </MudButton>
+            </MudStack>
+
+            @if (!string.IsNullOrWhiteSpace(_status))
+            {
+                <MudText Typo="Typo.caption" Class="mt-2 text-muted">@_status</MudText>
+            }
+        </MudForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private AthleteCreation _athleteForm = new();
+    private Athlete? athlete;
+    private MudForm? _form;
+    private string? _status;
+    private PaceValidator _validator = new();
+
+    // Track previous values to detect +/- (delta ≈ ±0.01)
+    private double _prevEasy, _prevMarathon, _prevSemi, _prevVma;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var fromStorage = await AthleteSession.GetAndSetAsync();
+            if (fromStorage is not null)
+            {
+                athlete = fromStorage;
+                _athleteForm = new AthleteCreation(athlete);
+            }
+
+            // initialize previous trackers
+            _prevEasy = _athleteForm.EasyPace;
+            _prevMarathon = _athleteForm.MarathonPace;
+            _prevSemi = _athleteForm.SemiMarathonPace;
+            _prevVma = _athleteForm.VmaPace;
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task SaveAsync()
+    {
+        athlete = _athleteForm.ToAthlete();
+        await AthleteSession.StoreAsync(athlete);
+        _status = "Athlete saved.";
+        Snackbar.Add("Athlete saved", MudBlazor.Severity.Success);
+    }
+
+    private async Task ResetAsync()
+    {
+        athlete = await AthleteSession.GetAndSetAsync() ?? new Athlete();
+        _athleteForm = new AthleteCreation(athlete);
+
+        _prevEasy = _athleteForm.EasyPace;
+        _prevMarathon = _athleteForm.MarathonPace;
+        _prevSemi = _athleteForm.SemiMarathonPace;
+        _prevVma = _athleteForm.VmaPace;
+
+        _status = "Form reset.";
+        StateHasChanged();
+    }
+
+    private async Task ClearStorageAsync()
+    {
+        await AthleteSession.RemoveAsync();
+        athlete = new Athlete();
+        _status = "Stored data cleared.";
+        StateHasChanged();
+    }
+
+    // ValueChanged handlers that coerce stepper edges (mm.60..mm.99) to either (m+1).00 or (m-1).59
+    private void OnEasyPaceChanged(double v)
+    {
+        _athleteForm.EasyPace = CoerceOnStepper(_prevEasy, v);
+        _prevEasy = _athleteForm.EasyPace;
+        StateHasChanged();
+    }
+    private void OnMarathonPaceChanged(double v)
+    {
+        _athleteForm.MarathonPace = CoerceOnStepper(_prevMarathon, v);
+        _prevMarathon = _athleteForm.MarathonPace;
+        StateHasChanged();
+    }
+    private void OnSemiMarathonPaceChanged(double v)
+    {
+        _athleteForm.SemiMarathonPace = CoerceOnStepper(_prevSemi, v);
+        _prevSemi = _athleteForm.SemiMarathonPace;
+        StateHasChanged();
+    }
+    private void OnVmaPaceChanged(double v)
+    {
+        _athleteForm.VmaPace = CoerceOnStepper(_prevVma, v);
+        _prevVma = _athleteForm.VmaPace;
+        StateHasChanged();
+    }
+
+    private static double CoerceOnStepper(double prev, double next)
+    {
+        bool increment = next > prev;
+
+        // detect +/- click by step of 0.01
+        bool isStepper = Math.Abs((next - prev) - 0.01d) < 1e-9 || Math.Abs((next - prev) + 0.01d) < 1e-9;
+        if (!isStepper) return next; // user typed; let validation handle it
+
+        var minutes = (int)Math.Truncate(next);
+        var dec = Math.Abs(next - minutes); // positive decimal part
+        var seconds = (int)Math.Round(dec * 100.0, MidpointRounding.ToZero); // treat 4.5 -> 50, 4.05 -> 5
+
+        if (seconds < 59) return next;
+
+        // seconds 60..99 -> normalize depending on direction
+        if (increment)
+        {
+            minutes += 1;
+            seconds = 0;
+        }
+        else
+        {
+            // going down from mm.60..99 -> mm:59
+            seconds = 59;
+        }
+        return Math.Round(minutes + seconds / 100.0, 2);
+    }
+}

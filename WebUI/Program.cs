@@ -1,10 +1,22 @@
+using Blazored.LocalStorage;
+using GarminRunerz.Workout.Services;
+using MudBlazor.Services;
 using WebUI.Components;
+using WebUI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
+
+builder.Services.AddBlazoredLocalStorage();
+builder.Services.AddMudServices();
+builder.Services.AddWorkoutServices();
+builder.Services.AddScoped<IPlanningLoaderService, PlanningLoaderService>();
+
+// Per-circuit session state
+builder.Services.AddScoped<IAthleteSession, AthleteSession>();
 
 var app = builder.Build();
 

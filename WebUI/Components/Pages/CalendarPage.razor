@@ -1,0 +1,73 @@
+﻿@page "/calendar"
+@rendermode InteractiveServer
+
+@using System.Collections.ObjectModel
+@using BlazorLibraries.MudPlanner
+@using System.MudPlanner
+@using GarminRunerz.Workout.Services.Models
+@using Toolbox.Utilities
+@using WebUI.Models
+@using WebUI.Services
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IAthleteSession AthleteSession
+
+<PageTitle>Calendar</PageTitle>
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+    <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Calendar</MudText>
+
+    <CalendarComponent @bind-Planning="CalendarEvents" @bind-WeekRecaps="WeekRecaps" HasWeekRecap="true"
+                       OnPlanningSaveCallback="PlanningSave" />
+
+</MudContainer>
+
+
+@code {
+    public ObservableCollection<CalendarEvent>? CalendarEvents { get; set; } = [];
+    public ObservableCollection<WeekRecap> WeekRecaps { get; set; } = [];
+    private List<CustomWorkout>? _workouts;
+    private Planning? _planning;
+    private DateOnly _planningStartDate;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        _planningStartDate = await localStorage.GetItemAsync<DateOnly>(Constants.StartDateKey);
+        _planning = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
+
+        var athlete = await AthleteSession.GetAndSetAsync();
+
+        if (_planning is null)
+        {
+            CalendarEvents = [];
+        }
+        else
+        {
+            WeekRecaps.AddRange(_planning.WeeksRecap);
+            CalendarEvents!.AddRange(_planning.CalendarEvents);
+        }
+        StateHasChanged();
+    }
+
+    // To move
+    private int GetWeekNumber(DateOnly eventDate)
+    {
+        if (eventDate < _planningStartDate)
+            throw new ArgumentOutOfRangeException(nameof(eventDate), "eventDate cannot be before startDate.");
+
+        int daysDifference = eventDate.DayNumber - _planningStartDate.DayNumber;
+        return (daysDifference / 7) + 1;
+    }
+    private async void PlanningSave((DateOnly date, CalendarEvent ev) args)
+    {
+        var wornkout = _planning.BaseWorkouts!.FirstOrDefault(w => w.Id == args.ev.Id);
+        var weekNumber = GetWeekNumber(args.ev.Date);
+        wornkout!.WeekNumber = weekNumber;
+
+        var plannedWorkout = _planning.Workouts.FirstOrDefault(w => w.Id == args.ev.Id);
+        plannedWorkout!.WeekNumber = weekNumber;
+        plannedWorkout.Date = args.ev.Date;
+
+        await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+    }
+}

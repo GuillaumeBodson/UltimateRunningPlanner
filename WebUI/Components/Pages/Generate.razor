@@ -1,0 +1,81 @@
+﻿@page "/generate"
+@using System.IO.Compression
+@using System.Text.Json
+@using GarminRunerz.Workout.Models
+@using GarminRunerz.Workout.Services
+@using GarminRunerz.Workout.Services.Models
+@using WebUI.Models
+@using MudBlazor
+@using Microsoft.JSInterop
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+@inject IWorkoutGeneratorService WorkoutGeneratorService
+
+<PageTitle>Generate</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Athlete Management</MudText>
+    <MudDivider Class="mb-4" />
+
+    <MudButton Variant="Variant.Filled"
+               Color="Color.Primary"
+               StartIcon="@Icons.Material.Filled.Download"
+               Disabled="@(!CanDownload)"
+               OnClick="DownloadWorkoutsAsync">
+        Download workouts
+    </MudButton>
+</MudContainer>
+
+@code {
+    private List<CustomWorkout>? Workouts { get; set; }
+    private bool CanDownload => Workouts is { Count: > 0 };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        try
+        {
+            var fromStorage = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
+            if (fromStorage is not null)
+            {
+                Workouts = fromStorage.BaseWorkouts
+                    .Where(w => w.Repetitions > 0)
+                    .ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            
+            throw;
+        }
+        
+
+        StateHasChanged();
+    }
+
+    private async Task DownloadWorkoutsAsync()
+    {
+        if (!CanDownload) return;
+
+        using var ms = new MemoryStream();
+        using (var archive = new ZipArchive(ms, ZipArchiveMode.Create, leaveOpen: true))
+        {
+            foreach (var workout in Workouts!)
+            {
+                var entry = archive.CreateEntry($"w{workout.WeekNumber}-{workout.RunType}.json");
+                await using var entryStream = entry.Open();
+
+                Workout garminWorkout = WorkoutGeneratorService.GenerateWorkoutsFromPlanning(workout);
+                await JsonSerializer.SerializeAsync(entryStream, garminWorkout);
+            }
+        }
+
+        ms.Position = 0;
+        using var streamRef = new DotNetStreamReference(ms);
+        var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
+        var fileName = $"workouts-{DateTime.UtcNow:yyyyMMdd-HHmmss}.zip";
+        await module.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+    }
+}
