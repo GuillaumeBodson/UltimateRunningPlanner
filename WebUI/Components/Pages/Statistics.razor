@@ -1,0 +1,157 @@
+@page "/statistics"
+@using System.Text.Json
+@using Blazored.LocalStorage
+@using WebUI.Models
+@inject ILocalStorageService localStorage
+@rendermode InteractiveServer
+
+<PageTitle>Statistics</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+    <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Training Statistics</MudText>
+    <MudDivider Class="mb-4" />
+
+    @if (IsLoading)
+    {
+        <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="my-7" />
+        <MudText Align="Align.Center">Loading statistics...</MudText>
+    }
+    else if (WeeklyData.Any())
+    {
+        <MudPaper Class="pa-4 mb-4">
+            <MudText Typo="Typo.h5" Class="mb-3">Weekly Distance (km)</MudText>
+            <MudChart ChartType="ChartType.Line"
+                      ChartSeries="@Series"
+                      XAxisLabels="@XAxisLabels"
+                      Width="100%"
+                      Height="350px"
+                      ChartOptions="@ChartOptions">
+            </MudChart>
+        </MudPaper>
+
+        <MudPaper Class="pa-4">
+            <MudText Typo="Typo.h6" Class="mb-3">Summary</MudText>
+            <MudGrid>
+                <MudItem xs="12" sm="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6" Color="Color.Primary">Total Distance</MudText>
+                            <MudText Typo="Typo.h4">@($"{TotalDistance:F1} km")</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6" Color="Color.Secondary">Average per Week</MudText>
+                            <MudText Typo="Typo.h4">@($"{AverageDistance:F1} km")</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6" Color="Color.Success">Max Week</MudText>
+                            <MudText Typo="Typo.h4">@($"{MaxDistance:F1} km")</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+                <MudItem xs="12" sm="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6" Color="Color.Info">Total Weeks</MudText>
+                            <MudText Typo="Typo.h4">@WeeklyData.Count</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            </MudGrid>
+        </MudPaper>
+    }
+    else if (!IsLoading)
+    {
+        <MudAlert Severity="Severity.Info" Class="my-4">
+            <MudText>No planning data found. Please import your training data first.</MudText>
+        </MudAlert>
+    }
+</MudContainer>
+
+@code {
+    private bool IsLoading = true;
+    private List<WeeklyAnalyticsData> WeeklyData = new();
+    private List<ChartSeries> Series = new();
+    private string[] XAxisLabels = Array.Empty<string>();
+
+    private double TotalDistance => WeeklyData.Sum(w => w.TotalDistance);
+    private double AverageDistance => WeeklyData.Any() ? WeeklyData.Average(w => w.TotalDistance) : 0;
+    private double MaxDistance => WeeklyData.Any() ? WeeklyData.Max(w => w.TotalDistance) : 0;
+
+    private ChartOptions ChartOptions = new()
+    {
+        YAxisTicks = 5,
+        MaxNumYAxisTicks = 10,
+        YAxisFormat = "F1",
+        LineStrokeWidth = 3
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+
+        try
+        {
+            await LoadStatisticsData();
+        }
+        catch (Exception ex)
+        {
+            // Log error - in production you'd want proper logging
+            Console.WriteLine($"Error loading statistics: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadStatisticsData()
+    {
+        var planning = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
+
+        if (planning?.Workouts?.Any() != true)
+        {
+            throw new InvalidDataException();
+        }
+
+        WeeklyData = planning!.Workouts.GroupBy(x => x.WeekNumber)
+            .Select(x => new WeeklyAnalyticsData
+            {
+                WeekLabel = $"Week {x.Key}",
+                TotalDistance = Math.Round(x.Sum(y => y.EstimatedDistance / 1000.0d), 1),
+                IntervalDistance = Math.Round(x.Sum(y => GetIntervalDistance(y)), 1)
+            }).ToList();
+
+
+        //Prepare chart data
+        XAxisLabels = WeeklyData.Select(w => w.WeekLabel).ToArray();
+        Series = new List<ChartSeries>
+                {
+                    new ChartSeries
+                    {
+                        Name = "Distance (km)",
+                        Data = WeeklyData.Select(w => w.TotalDistance).ToArray()
+                    },
+                    new ChartSeries
+                    {
+                        Name = "Interval (km)",
+                        Data = WeeklyData.Select(w => w.IntervalDistance).ToArray()
+                    }
+                };
+    }
+
+    private static double GetIntervalDistance(PlannedWorkout workout)
+    {
+        if (workout.Repetitions < 1) return 0d;
+
+        return workout.RunDuration * (double)workout.Pace.ToMeterPerSeconds() * workout.Repetitions / 1000d;
+    }
+}
