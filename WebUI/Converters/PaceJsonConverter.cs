@@ -1,9 +1,9 @@
-using System;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using WebUI.Models;
 
-namespace WebUI.Models;
+namespace WebUI.Converters;
 
 public sealed class PaceJsonConverter : JsonConverter<Pace>
 {
