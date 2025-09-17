@@ -1,5 +1,6 @@
 using Blazored.LocalStorage;
 using WebUI.Models;
+using WebUI.Services.Interfaces;
 
 namespace WebUI.Services;
 

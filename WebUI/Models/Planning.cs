@@ -33,38 +33,38 @@ public class Planning
 
     public Athlete Athlete{ get; set; }
 
-    public static Planning BuildPlanning(DateOnly startDate, List<CustomWorkout> workouts, Athlete athlete)
-    {        
-        var planning = new Planning();
-        var mondayOfweek = startDate.GetMonday();
-        planning.StartDate = mondayOfweek;
-        planning.BaseWorkouts = workouts;
-        planning.Athlete = athlete;
+    //public static Planning BuildPlanning(DateOnly startDate, List<CustomWorkout> workouts, Athlete athlete)
+    //{        
+    //    var planning = new Planning();
+    //    var mondayOfweek = startDate.GetMonday();
+    //    planning.StartDate = mondayOfweek;
+    //    planning.BaseWorkouts = workouts;
+    //    planning.Athlete = athlete;
 
-        var workoutPerWeeks = planning.BaseWorkouts.GroupBy(w => w.WeekNumber);
-        int id = 1;
-        foreach (var wkPerWeek in workoutPerWeeks)
-        {
-            var template = new Queue<DayOfWeek>(planning.TrainingTemplate[wkPerWeek.Count()]);
-            id = (wkPerWeek.Key + 9) * 100;
+    //    var workoutPerWeeks = planning.BaseWorkouts.GroupBy(w => w.WeekNumber);
+    //    int id = 1;
+    //    foreach (var wkPerWeek in workoutPerWeeks)
+    //    {
+    //        var template = new Queue<DayOfWeek>(planning.TrainingTemplate[wkPerWeek.Count()]);
+    //        id = (wkPerWeek.Key + 9) * 100;
 
-            foreach (var workout in wkPerWeek)
-            {
-                DayOfWeek trainingDay = template.Dequeue();
-                workout.Id = id++;
-                var plannedWorkout = new PlannedWorkout(workout, planning.Athlete);
-                if (trainingDay == DayOfWeek.Sunday)
-                {
-                    plannedWorkout.Date = mondayOfweek.AddDays(6);
-                }
-                else
-                {
-                    plannedWorkout.Date = mondayOfweek.AddDays((int)trainingDay - 1);
-                }
-                planning.Workouts.Add(plannedWorkout);
-            }
-            mondayOfweek = mondayOfweek.AddDays(7);
-        }
-        return planning;
-    }
+    //        foreach (var workout in wkPerWeek)
+    //        {
+    //            DayOfWeek trainingDay = template.Dequeue();
+    //            workout.Id = id++;
+    //            var plannedWorkout = new PlannedWorkout(workout, planning.Athlete);
+    //            if (trainingDay == DayOfWeek.Sunday)
+    //            {
+    //                plannedWorkout.Date = mondayOfweek.AddDays(6);
+    //            }
+    //            else
+    //            {
+    //                plannedWorkout.Date = mondayOfweek.AddDays((int)trainingDay - 1);
+    //            }
+    //            planning.Workouts.Add(plannedWorkout);
+    //        }
+    //        mondayOfweek = mondayOfweek.AddDays(7);
+    //    }
+    //    return planning;
+    //}
 }

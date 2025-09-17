@@ -1,6 +1,6 @@
 using WebUI.Models;
 
-namespace WebUI.Services;
+namespace WebUI.Services.Interfaces;
 
 public interface IAthleteSession
 {

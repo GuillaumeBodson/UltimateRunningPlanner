@@ -1,12 +1,14 @@
 ﻿@page "/import"
 @using System.Globalization
-@using WebUI.Models
 @using MudBlazor
+@using WebUI.Models
 @using WebUI.Services
+@using WebUI.Services.Interfaces
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject ISnackbar Snackbar
 @inject IPlanningLoaderService PlanningLoaderService
 @inject IAthleteSession AthleteSession
+@inject IPlanningBuilder PlanningBuilder
 @rendermode InteractiveServer
 
 <PageTitle>Import</PageTitle>
@@ -25,7 +27,7 @@
                            Variant="Variant.Outlined"
                            PickerVariant="PickerVariant.Static"
                            DisableToolbar="true"
-                           OnClosed="OnDatePickerClosed" />
+                           onchange="OnDatePickerClosed" />
 
             @if (_startDateTime is not null)
             {
@@ -95,9 +97,10 @@
 
             var workouts = await PlanningLoaderService.LoadPlanningAsync(stream);
 
-            var planning = Planning.BuildPlanning(DateOnly.FromDateTime(_startDateTime!.Value), workouts, _athlete);
+            var planning = PlanningBuilder.BuildPlanning(DateOnly.FromDateTime(_startDateTime!.Value), workouts, _athlete);
 
             await localStorage.SetItemAsync(Constants.PlanningKey, planning);
+            await localStorage.SetItemAsync(Constants.StartDateKey, DateOnly.FromDateTime(_startDateTime!.Value));
 
             var count = workouts?.Count() ?? 0;
             _lastImportSummary = $"Imported {count} workouts from “{file.Name}”.";

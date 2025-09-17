@@ -1,6 +1,6 @@
 using GarminRunerz.Workout.Services.Models;
 
-namespace WebUI.Services;
+namespace WebUI.Services.Interfaces;
 
 public interface IPlanningLoaderService
 {
