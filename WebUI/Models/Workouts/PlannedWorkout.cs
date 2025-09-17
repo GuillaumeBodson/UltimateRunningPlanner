@@ -6,7 +6,7 @@ using System.MudPlanner;
 using System.Text.Json.Serialization;
 using WebUI.Converters;
 
-namespace WebUI.Models;
+namespace WebUI.Models.Workouts;
 
 [JsonConverter(typeof(PlannedWorkoutJsonConverter))]
 public abstract class PlannedWorkout : CustomWorkout

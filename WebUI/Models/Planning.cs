@@ -2,6 +2,7 @@
 using System.MudPlanner;
 using System.Text.Json.Serialization;
 using Toolbox.Utilities;
+using WebUI.Models.Workouts;
 
 namespace WebUI.Models;
 

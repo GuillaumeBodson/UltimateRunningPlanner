@@ -1,7 +1,8 @@
 using GarminRunerz.Workout.Services.Models;
 using WebUI.Models;
+using WebUI.Models.Workouts;
 
-namespace WebUI.Services;
+namespace WebUI.Creators;
 
 /// <summary>
 /// Abstract factory for a specific RunType family — responsible for creating a concrete PlannedWorkout.

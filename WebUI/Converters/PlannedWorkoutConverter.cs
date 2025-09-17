@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 using GarminRunerz.Workout.Services.Models;
-using WebUI.Models;
+using WebUI.Models.Workouts;
 
 namespace WebUI.Converters;
 

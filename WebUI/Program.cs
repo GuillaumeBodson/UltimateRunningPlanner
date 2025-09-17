@@ -2,8 +2,8 @@ using Blazored.LocalStorage;
 using GarminRunerz.Workout.Services;
 using MudBlazor.Services;
 using WebUI.Components;
+using WebUI.Creators;
 using WebUI.Services;
-using WebUI.Services.Creators;
 using WebUI.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);

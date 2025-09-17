@@ -1,7 +1,9 @@
 using GarminRunerz.Workout.Services.Models;
 using WebUI.Models;
+using WebUI.Models.Workouts;
+using WebUI.Services;
 
-namespace WebUI.Services.Creators;
+namespace WebUI.Creators;
 
 public class EasyPlannedWorkoutCreator : AbstractPlannedWorkoutCreator
 {

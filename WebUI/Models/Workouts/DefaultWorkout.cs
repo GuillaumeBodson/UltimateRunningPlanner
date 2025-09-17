@@ -1,6 +1,6 @@
 using MudBlazor;
 
-namespace WebUI.Models;
+namespace WebUI.Models.Workouts;
 
 public sealed class DefaultWorkout : PlannedWorkout
 {
