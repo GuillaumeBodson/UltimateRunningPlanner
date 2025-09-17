@@ -12,7 +12,7 @@ public sealed class LongRunWorkout : PlannedWorkout
             if (Repetitions == 0)
                 return $"W{WeekNumber} Long run ({km}km)";
 
-            return $"W{WeekNumber} Long run with {Repetitions}x{RunDuration}\" @ {FormatPace()}min/km ({km}m)";
+            return $"W{WeekNumber} Long run with {Repetitions}x{RunDuration}\" @ {FormatPace()}min/km ({km}km)";
         }
     }
 
