@@ -12,23 +12,24 @@ namespace WebUI.Services;
 /// </summary>
 public class PlannedWorkoutFactory : IPlannedWorkoutFactory
 {
-    private readonly IEnumerable<IPlannedWorkoutCreator> _creators;
+    private readonly IDictionary<RunType, IPlannedWorkoutCreator> _creators;
 
     public PlannedWorkoutFactory(IEnumerable<IPlannedWorkoutCreator> creators)
     {
-        _creators = creators ?? throw new ArgumentNullException(nameof(creators));
+        var dict = Enum.GetValues<RunType>().ToDictionary(rt => creators.First(x => x.CanCreate(rt)));
+        var runtypes = Enum.GetValues<RunType>();
+        _creators = creators.ToDictionary(rt => runtypes.First(x => rt.CanCreate(x)));
     }
 
     public PlannedWorkout Create(CustomWorkout workout, Athlete athlete, DateOnly date)
     {
-        if (workout is null) throw new ArgumentNullException(nameof(workout));
-        if (athlete is null) throw new ArgumentNullException(nameof(athlete));
+        ArgumentNullException.ThrowIfNull(workout);
+        ArgumentNullException.ThrowIfNull(athlete);
 
-        var creator = _creators.FirstOrDefault(c => c.CanCreate(workout.RunType))
-            ?? _creators.FirstOrDefault(c => c.CanCreate(RunType.Other));
-
-        if (creator is null)
+        if (_creators.TryGetValue(workout.RunType, out var creator) || creator is null)
+        {
             throw new InvalidOperationException("No PlannedWorkout creator registered for RunType " + workout.RunType);
+        }
 
         return creator.Create(workout, athlete, date);
     }
