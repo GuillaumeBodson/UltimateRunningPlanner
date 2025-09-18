@@ -2,12 +2,8 @@ using MudBlazor;
 
 namespace WebUI.Models.Workouts;
 
-public sealed class SteadyWorkout : PlannedWorkout, IQualityWorkout
+public sealed class SteadyWorkout : StructuredWorkout
 {
-    public int Repetitions { get; set; }
-    public double RunDuration { get; set; }
-    public double CoolDownDuration { get; set; }
-
     public override string Name
     {
         get
@@ -16,7 +12,7 @@ public sealed class SteadyWorkout : PlannedWorkout, IQualityWorkout
             if (Repetitions == 0)
                 return $"W{WeekNumber} Steady run ({km}km)";
 
-            return $"W{WeekNumber} Steady run with {RunDuration}\" @ {FormatPace()}min/km";
+            return $"W{WeekNumber} Steady run with {IntervalDuration}\" @ {FormatPace()}min/km";
         }
     }
 
