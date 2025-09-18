@@ -151,7 +151,8 @@
 
     private static double GetIntervalDistance(PlannedWorkout workout)
     {
-        if (workout is IQualityWorkout qualityWorkout) 
+        IQualityWorkout? qualityWorkout = workout as IQualityWorkout;
+        if (qualityWorkout is not null && qualityWorkout.Repetitions > 0)
             return qualityWorkout.RunDuration * (double)workout.Pace.ToMeterPerSeconds() * qualityWorkout.Repetitions / 1000d;
 
         return 0d;
