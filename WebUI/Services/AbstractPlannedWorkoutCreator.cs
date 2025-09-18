@@ -36,7 +36,7 @@ public abstract class AbstractPlannedWorkoutCreator : IPlannedWorkoutCreator
         instance.EstimatedDistance = WorkoutEstimator.EstimateDistance(workout, athlete);
         instance.EstimatedTime = WorkoutEstimator.EstimateDuration(workout);
 
-        if(instance is IQualityWorkout qualityWorkout)
+        if (instance is IQualityWorkout qualityWorkout)
         {
             qualityWorkout.Repetitions = workout.Repetitions;
             qualityWorkout.RunDuration = workout.RunDuration;
