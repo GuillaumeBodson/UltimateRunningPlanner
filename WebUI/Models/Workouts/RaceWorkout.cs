@@ -8,4 +8,7 @@ public sealed class RaceWorkout : PlannedWorkout
 
     protected override Color CalendarColor => Color.Error;
     protected override string EventLabel => "Race";
+
+    protected override double CalculateWorkoutDistanceCore(decimal easySpeed, decimal effortSpeed)
+        => TotalDuration * (double)Pace.ToMeterPerSeconds();
 }

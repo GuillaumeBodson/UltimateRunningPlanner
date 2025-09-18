@@ -32,9 +32,7 @@ public abstract class AbstractPlannedWorkoutCreator : IPlannedWorkoutCreator
         instance.TotalDuration = workout.TotalDuration;
         instance.Pace = Pace.FromMinutesDecimal(workout.Pace);
         instance.Description = workout.Description;
-        instance.Date = date;
-        instance.EstimatedDistance = WorkoutEstimator.EstimateDistance(workout, athlete);
-        instance.EstimatedTime = WorkoutEstimator.EstimateDuration(workout);
+        instance.Date = date;        
 
         if (instance is IStructuredWorkout qualityWorkout)
         {
@@ -42,5 +40,8 @@ public abstract class AbstractPlannedWorkoutCreator : IPlannedWorkoutCreator
             qualityWorkout.IntervalDuration = (int)Math.Round(workout.RunDuration);
             qualityWorkout.RecoveryDuration = (int)Math.Round(workout.CoolDownDuration);
         }
+
+        instance.EstimatedDistance = instance.CalculateEstimatedDistance(athlete);
+        instance.EstimatedTime = instance.CalculateEstimatedDuration();
     }
 }
