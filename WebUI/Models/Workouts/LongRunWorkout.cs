@@ -2,8 +2,11 @@ using MudBlazor;
 
 namespace WebUI.Models.Workouts;
 
-public sealed class LongRunWorkout : PlannedWorkout
+public sealed class LongRunWorkout : PlannedWorkout, IQualityWorkout
 {
+    public int Repetitions { get; set; }
+    public double RunDuration { get; set; }
+    public double CoolDownDuration { get; set; }
     public override string Name
     {
         get
