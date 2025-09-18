@@ -2,7 +2,7 @@ using MudBlazor;
 
 namespace WebUI.Models.Workouts;
 
-public sealed class SteadyWorkout : PlannedWorkout
+public sealed class SteadyWorkout : StructuredWorkout
 {
     public override string Name
     {
@@ -12,7 +12,7 @@ public sealed class SteadyWorkout : PlannedWorkout
             if (Repetitions == 0)
                 return $"W{WeekNumber} Steady run ({km}km)";
 
-            return $"W{WeekNumber} Steady run with {RunDuration}\" @ {FormatPace()}min/km";
+            return $"W{WeekNumber} Steady run with {IntervalDuration}\" @ {FormatPace()}min/km";
         }
     }
 

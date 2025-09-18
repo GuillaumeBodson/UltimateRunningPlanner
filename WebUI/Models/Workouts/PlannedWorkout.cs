@@ -8,12 +8,17 @@ using WebUI.Converters;
 namespace WebUI.Models.Workouts;
 
 [JsonConverter(typeof(PlannedWorkoutJsonConverter))]
-public abstract class PlannedWorkout : CustomWorkout
+public abstract class PlannedWorkout
 {
+    public int Id { get; set; }
+    public int WeekNumber { get; set; }
+    public RunType RunType { get; set; }
+    public int TotalDuration { get; set; }
+    public string Description { get; set; } = string.Empty;
     public DateOnly Date { get; set; }
     public int EstimatedDistance { get; set; }
     public int EstimatedTime { get; set; }
-    public new Pace Pace { get; set; }
+    public Pace Pace { get; set; }
 
     /// <summary>
     /// Display name (run-type specific).

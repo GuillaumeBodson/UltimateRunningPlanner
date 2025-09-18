@@ -16,7 +16,6 @@ public class PlannedWorkoutFactory : IPlannedWorkoutFactory
 
     public PlannedWorkoutFactory(IEnumerable<IPlannedWorkoutCreator> creators)
     {
-        var dict = Enum.GetValues<RunType>().ToDictionary(rt => creators.First(x => x.CanCreate(rt)));
         var runtypes = Enum.GetValues<RunType>();
         _creators = creators.ToDictionary(rt => runtypes.First(x => rt.CanCreate(x)));
     }

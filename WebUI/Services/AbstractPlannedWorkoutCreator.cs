@@ -14,31 +14,33 @@ public abstract class AbstractPlannedWorkoutCreator : IPlannedWorkoutCreator
 
     public PlannedWorkout Create(CustomWorkout workout, Athlete athlete, DateOnly date)
     {
-        if (workout is null) throw new ArgumentNullException(nameof(workout));
-        if (athlete is null) throw new ArgumentNullException(nameof(athlete));
+        ArgumentNullException.ThrowIfNull(workout);
+        ArgumentNullException.ThrowIfNull(athlete);
 
         var instance = CreateInstance();
-        PopulateCommon(instance, workout, athlete);
-        instance.Date = date;
+        PopulateCommon(instance, workout, athlete, date);
         return instance;
     }
 
     protected abstract PlannedWorkout CreateInstance();
 
-    protected void PopulateCommon(PlannedWorkout instance, CustomWorkout workout, Athlete athlete)
+    protected virtual void PopulateCommon(PlannedWorkout instance, CustomWorkout workout, Athlete athlete, DateOnly date)
     {
         instance.Id = workout.Id;
         instance.WeekNumber = workout.WeekNumber;
         instance.RunType = workout.RunType;
         instance.TotalDuration = workout.TotalDuration;
-        instance.Repetitions = workout.Repetitions;
-        instance.RunDuration = workout.RunDuration;
-        instance.CoolDownDuration = workout.CoolDownDuration;
         instance.Pace = Pace.FromMinutesDecimal(workout.Pace);
-        instance.Speed = workout.Speed;
         instance.Description = workout.Description;
-
+        instance.Date = date;
         instance.EstimatedDistance = WorkoutEstimator.EstimateDistance(workout, athlete);
         instance.EstimatedTime = WorkoutEstimator.EstimateDuration(workout);
+
+        if (instance is IStructuredWorkout qualityWorkout)
+        {
+            qualityWorkout.Repetitions = workout.Repetitions;
+            qualityWorkout.IntervalDuration = (int)Math.Round(workout.RunDuration);
+            qualityWorkout.RecoveryDuration = (int)Math.Round(workout.CoolDownDuration);
+        }
     }
 }
