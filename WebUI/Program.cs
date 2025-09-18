@@ -2,7 +2,7 @@ using Blazored.LocalStorage;
 using GarminRunerz.Workout.Services;
 using MudBlazor.Services;
 using WebUI.Components;
-using WebUI.Creators;
+using WebUI.DI;
 using WebUI.Services;
 using WebUI.Services.Interfaces;
 
@@ -21,16 +21,7 @@ builder.Services.AddScoped<IPlanningLoaderService, PlanningLoaderService>();
 builder.Services.AddScoped<IAthleteSession, AthleteSession>();
 
 // Register all concrete creators (Abstract Factory participants)
-builder.Services.AddScoped<IPlannedWorkoutCreator, EasyPlannedWorkoutCreator>();
-builder.Services.AddScoped<IPlannedWorkoutCreator, SteadyPlannedWorkoutCreator>();
-builder.Services.AddScoped<IPlannedWorkoutCreator, IntervalPlannedWorkoutCreator>();
-builder.Services.AddScoped<IPlannedWorkoutCreator, TempoPlannedWorkoutCreator>();
-builder.Services.AddScoped<IPlannedWorkoutCreator, LongRunPlannedWorkoutCreator>();
-builder.Services.AddScoped<IPlannedWorkoutCreator, RacePlannedWorkoutCreator>();
-builder.Services.AddScoped<IPlannedWorkoutCreator, DefaultPlannedWorkoutCreator>();
-
-// Registry factory that picks the right concrete creator
-builder.Services.AddScoped<IPlannedWorkoutFactory, PlannedWorkoutFactory>();
+builder.Services.AddPlannedWorkoutFactories();
 
 builder.Services.AddScoped<IPlanningBuilder, PlanningBuilder>();
 
