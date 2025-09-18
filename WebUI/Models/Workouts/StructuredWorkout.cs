@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-
+using Garmin = GarminRunerz.Workout.Services;
 namespace WebUI.Models.Workouts;
 
 /// <summary>
@@ -30,7 +30,7 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
         get => _intervalDuration;
         set
         {
-            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "RunDuration cannot be negative.");
+            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "IntervalDuration cannot be negative.");
             _intervalDuration = value;
         }
     }
@@ -43,15 +43,65 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
         get => _recoveryDuration;
         set
         {
-            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "CoolDownDuration cannot be negative.");
+            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "RecoveryDuration cannot be negative.");
             _recoveryDuration = value;
         }
     }
 
-    /// <summary>
-    /// Indicates whether the structured block is effectively empty (no interval component).
-    /// </summary>
-    [MemberNotNullWhen(false, nameof(Repetitions))]
     public bool IsEmpty => Repetitions == 0 || IntervalDuration <= 0;
     
+    // Override template methods for interval-based calculations
+    /// <summary>
+    /// Gets the appropriate speed for intervals based on run type.
+    /// </summary>
+    protected override decimal GetEffortSpeed(Athlete athlete)
+    {
+        return RunType switch
+        {
+            Garmin.Models.RunType.Tempo => athlete.SemiMarathonPace.ToMeterPerSeconds(),
+            Garmin.Models.RunType.Intervals => athlete.VmaPace.ToMeterPerSeconds(),
+            _ => Pace.ToMeterPerSeconds()
+        };
+    }
+    
+    /// <summary>
+    /// Calculates distance for structured workouts with intervals.
+    /// </summary>
+    protected override double CalculateWorkoutDistanceCore(decimal easySpeed, decimal effortSpeed)
+    {
+        if (IsEmpty)
+        {
+            return TotalDuration * (double)easySpeed;
+        }
+        
+        // Calculate interval components
+        double effortDistance = (double)effortSpeed * IntervalDuration * Repetitions;
+        double recoveryDistance = (double)easySpeed * RecoveryDuration * Repetitions;
+        
+        if (RunType is Garmin.Models.RunType.Tempo or Garmin.Models.RunType.Intervals)
+        {
+            // Fixed warm-up/cool-down for tempo/intervals
+            double warmUpDistance = 15 * 60 * (double)easySpeed;
+            double coolDownDistance = 10 * 60 * (double)easySpeed;
+            return effortDistance + recoveryDistance + warmUpDistance + coolDownDistance;
+        }
+        else
+        {
+            // For other structured runs (e.g. long runs with intervals)
+            // Use remaining time after intervals for warm-up
+            double warmUpDuration = TotalDuration - (IntervalDuration + RecoveryDuration) * Repetitions;
+            if (warmUpDuration < 0) warmUpDuration = 0; // Safety check
+            
+            double warmUpDistance = warmUpDuration * (double)easySpeed;
+            return effortDistance + recoveryDistance + warmUpDistance;
+        }
+    }
+    
+    /// <summary>
+    /// Calculates core duration for structured workouts.
+    /// </summary>
+    protected override int CalculateWorkoutDurationCore()
+    {
+        return (IntervalDuration + RecoveryDuration) * Repetitions;
+    }
 }

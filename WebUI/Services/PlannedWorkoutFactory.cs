@@ -18,6 +18,7 @@ public class PlannedWorkoutFactory : IPlannedWorkoutFactory
     {
         var runtypes = Enum.GetValues<RunType>();
         _creators = creators.ToDictionary(rt => runtypes.First(x => rt.CanCreate(x)));
+        _creators[RunType.Recovery] = _creators[RunType.Easy]; // Recovery is a subtype of Easy
     }
 
     public PlannedWorkout Create(CustomWorkout workout, Athlete athlete, DateOnly date)
@@ -25,7 +26,7 @@ public class PlannedWorkoutFactory : IPlannedWorkoutFactory
         ArgumentNullException.ThrowIfNull(workout);
         ArgumentNullException.ThrowIfNull(athlete);
 
-        if (_creators.TryGetValue(workout.RunType, out var creator) || creator is null)
+        if (!_creators.TryGetValue(workout.RunType, out var creator) || creator is null)
         {
             throw new InvalidOperationException("No PlannedWorkout creator registered for RunType " + workout.RunType);
         }
