@@ -13,12 +13,7 @@ public class Planning
 
     public List<CustomWorkout> BaseWorkouts { get; set; } = [];
 
-    public Dictionary<int, HashSet<DayOfWeek>> TrainingTemplate { get; set; } = new()
-    {
-        [5] = [DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday],
-        [4] = [DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Friday, DayOfWeek.Sunday],
-        [3] = [DayOfWeek.Monday, DayOfWeek.Wednesday, DayOfWeek.Saturday],
-    };
+    public TrainingTemplate TrainingTemplate { get; set; } = new();
     [JsonIgnore]
     public List<CalendarEvent> CalendarEvents  => Workouts.Select(w => w.ToCalendarEvent()).ToList();
     [JsonIgnore]
@@ -46,7 +41,7 @@ public class Planning
     //    int id = 1;
     //    foreach (var wkPerWeek in workoutPerWeeks)
     //    {
-    //        var template = new Queue<DayOfWeek>(planning.TrainingTemplate[wkPerWeek.Count()]);
+    //        var template = planning.TrainingTemplate.GetTrainingDaysQueue(wkPerWeek.Count());
     //        id = (wkPerWeek.Key + 9) * 100;
 
     //        foreach (var workout in wkPerWeek)

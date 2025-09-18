@@ -26,7 +26,7 @@ public class PlanningBuilder : IPlanningBuilder
         int id = 1;
         foreach (var wkPerWeek in workoutPerWeeks)
         {
-            var template = new Queue<DayOfWeek>(planning.TrainingTemplate[wkPerWeek.Count()]);
+            var template = planning.TrainingTemplate.GetTrainingDaysQueue(wkPerWeek.Count());
             id = (wkPerWeek.Key + 9) * 100;
 
             foreach (var workout in wkPerWeek)
