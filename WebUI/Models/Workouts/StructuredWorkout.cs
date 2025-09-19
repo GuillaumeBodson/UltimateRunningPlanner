@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using Garmin = GarminRunerz.Workout.Services;
+﻿using Garmin = GarminRunerz.Workout.Services;
 namespace WebUI.Models.Workouts;
 
 /// <summary>
