@@ -85,8 +85,7 @@ public sealed class TrainingTemplate
 
             // 2. If still none: try any rest day (null)
             chosen ??= _plan.Where(p => p.Value is null && !used.Contains(p.Key))
-                              .Select(p => p.Key)
-                              .Cast<DayOfWeek?>()
+                              .Select(p => (DayOfWeek?)p.Key)
                               .FirstOrDefault();
 
             // 3. Fallback: any unused day
