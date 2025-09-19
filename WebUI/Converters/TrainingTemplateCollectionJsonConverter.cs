@@ -13,7 +13,7 @@ public class TrainingTemplateCollectionJsonConverter : JsonConverter<TrainingTem
         if (list != null)
         {
             foreach (var item in list)
-                collection.Add(item);
+                collection.TryAdd(item);
         }
         return collection;
     }

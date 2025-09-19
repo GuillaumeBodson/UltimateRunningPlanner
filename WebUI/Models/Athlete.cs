@@ -11,14 +11,14 @@ public class Athlete
     private readonly TrainingTemplateCollection _trainingTemplates = [];
     public TrainingTemplateCollection TrainingTemplates => _trainingTemplates;
 
-    public void AddTemplate(TrainingTemplate template)
+    public bool TryAddTemplate(TrainingTemplate template)
     {
         ArgumentNullException.ThrowIfNull(template);
-        _trainingTemplates.TryAdd(template);
+        return _trainingTemplates.TryAdd(template);
     }
 
     public TrainingTemplate? GetTemplateForTrainingDays(int trainingDays) =>
-        _trainingTemplates.FirstOrDefault(t => t.TrainingDaysCount == trainingDays);
+        _trainingTemplates.GetForTrainingDays(trainingDays);
 }
 
 public class AthleteCreation

@@ -5,7 +5,7 @@ using WebUI.Converters;
 namespace WebUI.Models;
 
 [JsonConverter(typeof(TrainingTemplateCollectionJsonConverter))]
-public class TrainingTemplateCollection : IEnumerable<TrainingTemplate>, IEnumerable
+public class TrainingTemplateCollection : IReadOnlyCollection<TrainingTemplate>
 {
     private readonly Dictionary<int, TrainingTemplate> _templates = [];
     
@@ -18,15 +18,16 @@ public class TrainingTemplateCollection : IEnumerable<TrainingTemplate>, IEnumer
     public TrainingTemplate? GetForTrainingDays(int numberOfTrainingDays) =>
         _templates.TryGetValue(numberOfTrainingDays, out var template) ? template : null;
 
-    public void Add(TrainingTemplate template) => _templates.TryAdd(template.TrainingDaysCount, template);
     public bool TryAdd(TrainingTemplate template) => _templates.TryAdd(template.TrainingDaysCount, template);
     public void Clear() => _templates.Clear();
     public bool Remove(int numberOfTrainingDays) => _templates.Remove(numberOfTrainingDays);
 
     // More selective factory method
-    public static TrainingTemplateCollection CreateWithDefaults() => 
-        [ 
-            TrainingTemplate.Default4(), 
-            TrainingTemplate.Default5() 
-        ];
+    public static TrainingTemplateCollection CreateWithDefaults()
+    {
+        var collection = new TrainingTemplateCollection();
+        collection.TryAdd(TrainingTemplate.Default4());
+        collection.TryAdd(TrainingTemplate.Default5());
+        return collection;
+    }
 }
