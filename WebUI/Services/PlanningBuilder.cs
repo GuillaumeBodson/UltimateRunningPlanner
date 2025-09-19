@@ -34,7 +34,7 @@ public class PlanningBuilder : IPlanningBuilder
             planning.Template.TryAdd(template);
 
             int idSeed = (weekGroup.Key + 9) * 100;
-            foreach (var (workout, day) in template.ScheduleWeek(weekGroup.ToList()))
+            foreach (var (workout, day) in template.ScheduleWeek(weekGroup))
             {
                 workout.Id = idSeed++;
 
