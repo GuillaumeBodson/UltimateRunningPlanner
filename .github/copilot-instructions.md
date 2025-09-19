@@ -1,4 +1,4 @@
-# AGENTS - UltimateRunningPlanner Copilot Instructions
+# UltimateRunningPlanner Copilot Instructions
 
 Scope
 - Use these instructions when performing code reviews, suggestions, or automated refactors.
@@ -23,10 +23,6 @@ Rules and focus areas
   - Avoid public mutable fields; prefer properties with deliberate accessor visibility.
   - Use nullable reference types and explicit null checks for public APIs.
 
-- API design & compatibility:
-  - Flag public API changes. Prefer non-breaking changes; recommend deprecation patterns for breaking changes.
-  - When a breaking change is necessary, provide migration guidance and unit test suggestions.
-
 - Async & concurrency:
   - Use async/await when I/O-bound; name async methods with the "Async" suffix.
   - Include CancellationToken on cancellable async APIs.
@@ -36,16 +32,6 @@ Rules and focus areas
   - Prefer interfaces and abstraction for I/O, time, and external dependencies to facilitate testing.
   - Prefer composition over inheritance; avoid deep inheritance hierarchies.
 
-Suggestion style & constraints
-- Provide focused code snippets or diffs that compile against C# 13 / .NET 9.
-- Explain why: short rationale (benefit + trade-offs).
-- Label purely stylistic suggestions as "Recommendation" (not required).
-- When proposing new APIs, include XML doc summary and rationale.
-
-Tone and output
-- Concise, actionable, and professional.
-- One-line summary of impact at the top of each suggestion.
-- Examples and code must be copy/paste-ready and follow existing repository style.
-
 Operational notes
 - Do not suggest features incompatible with project C#/.NET targets.
+- Do not change target framework.
