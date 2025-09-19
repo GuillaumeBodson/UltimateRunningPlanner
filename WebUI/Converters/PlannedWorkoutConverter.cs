@@ -15,7 +15,8 @@ public sealed class PlannedWorkoutJsonConverter : JsonConverter<PlannedWorkout>
         if (!root.TryGetProperty("RunType", out var runTypeProp))
             throw new JsonException("Missing RunType discriminator.");
 
-        RunType runType = (RunType)runTypeProp.GetInt32();
+        RunType runType = Enum.Parse<RunType>(runTypeProp.GetString()
+            ?? throw new JsonException("Missing RunType discriminator."));
 
         Type concrete = runType switch
         {

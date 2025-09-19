@@ -16,32 +16,46 @@ public class PlanningBuilder : IPlanningBuilder
 
     public Planning BuildPlanning(DateOnly startDate, List<CustomWorkout> workouts, Athlete athlete)
     {
-        var planning = new Planning();
-        var mondayOfweek = startDate.GetMonday();
-        planning.StartDate = mondayOfweek;
-        planning.BaseWorkouts = workouts;
-        planning.Athlete = athlete;
-
-        var workoutPerWeeks = planning.BaseWorkouts.GroupBy(w => w.WeekNumber);
-        int id = 1;
-        foreach (var wkPerWeek in workoutPerWeeks)
+        var planning = new Planning
         {
-            var template = new Queue<DayOfWeek>(planning.TrainingTemplate[wkPerWeek.Count()]);
-            id = (wkPerWeek.Key + 9) * 100;
+            StartDate = startDate.GetMonday(),
+            BaseWorkouts = workouts,
+            Athlete = athlete
+        };
 
-            foreach (var workout in wkPerWeek)
+        var mondayOfWeek = planning.StartDate;
+
+        foreach (var weekGroup in planning.BaseWorkouts.GroupBy(w => w.WeekNumber).OrderBy(g => g.Key))
+        {
+            int numberOfTrainingDays = weekGroup.Count();
+            var template = athlete.GetTemplateForTrainingDays(numberOfTrainingDays)
+                ?? ResolveDefaultTemplate(numberOfTrainingDays);
+
+            planning.Template.TryAdd(template);
+
+            int idSeed = (weekGroup.Key + 9) * 100;
+            foreach (var (workout, day) in template.ScheduleWeek(weekGroup.ToList()))
             {
-                DayOfWeek trainingDay = template.Dequeue();
-                workout.Id = id++;
+                workout.Id = idSeed++;
 
-                var date = trainingDay == DayOfWeek.Sunday ? mondayOfweek.AddDays(6) : mondayOfweek.AddDays((int)trainingDay - 1);
+                var date = day == DayOfWeek.Sunday
+                    ? mondayOfWeek.AddDays(6)
+                    : mondayOfWeek.AddDays((int)day - 1);
 
-                var plannedWorkout = _workoutCreator.Create(workout, athlete, date);
-
-                planning.Workouts.Add(plannedWorkout);
+                var planned = _workoutCreator.Create(workout, athlete, date);
+                planning.Workouts.Add(planned);
             }
-            mondayOfweek = mondayOfweek.AddDays(7);
+
+            mondayOfWeek = mondayOfWeek.AddDays(7);
         }
+
         return planning;
     }
+
+    private static TrainingTemplate ResolveDefaultTemplate(int days) =>
+        days switch
+        {
+            <=4 => TrainingTemplate.Default4(),
+            >=5 => TrainingTemplate.Default5(),
+        };
 }

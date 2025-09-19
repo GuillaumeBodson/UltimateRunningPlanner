@@ -6,6 +6,19 @@ public class Athlete
     public Pace MarathonPace { get; set; }
     public Pace SemiMarathonPace { get; set; }
     public Pace VmaPace { get; set; }
+
+    // Training templates suitable for this athlete (different day counts, distributions, periods, etc.)
+    private readonly TrainingTemplateCollection _trainingTemplates = [];
+    public TrainingTemplateCollection TrainingTemplates => _trainingTemplates;
+
+    public void AddTemplate(TrainingTemplate template)
+    {
+        ArgumentNullException.ThrowIfNull(template);
+        _trainingTemplates.TryAdd(template);
+    }
+
+    public TrainingTemplate? GetTemplateForTrainingDays(int trainingDays) =>
+        _trainingTemplates.FirstOrDefault(t => t.TrainingDaysCount == trainingDays);
 }
 
 public class AthleteCreation
