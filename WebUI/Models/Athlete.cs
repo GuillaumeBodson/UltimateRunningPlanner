@@ -7,9 +7,17 @@ public class Athlete
     public Pace SemiMarathonPace { get; set; }
     public Pace VmaPace { get; set; }
 
-    // Training templates suitable for this athlete (different day counts, distributions, periods, etc.)
     private readonly TrainingTemplateCollection _trainingTemplates = [];
-    public TrainingTemplateCollection TrainingTemplates => _trainingTemplates;
+    public TrainingTemplateCollection TrainingTemplates { get => _trainingTemplates; 
+        set 
+        {
+            ArgumentNullException.ThrowIfNull(value);
+            _trainingTemplates.Clear();
+            foreach (var template in value)
+            {
+                _trainingTemplates.TryAdd(template);
+            }
+        } }
 
     public bool TryAddTemplate(TrainingTemplate template)
     {
