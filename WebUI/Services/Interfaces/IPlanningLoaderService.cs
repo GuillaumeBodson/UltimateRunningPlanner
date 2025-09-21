@@ -4,6 +4,6 @@ namespace WebUI.Services.Interfaces;
 
 public interface IPlanningLoaderService
 {
-    List<CustomWorkout> LoadPlanning(string filePath);
+    Task<List<CustomWorkout>> LoadPlanningFromFileAsync(string filePath);
     Task<List<CustomWorkout>> LoadPlanningAsync(Stream fileStream);
 }

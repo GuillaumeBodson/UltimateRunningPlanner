@@ -1,7 +1,11 @@
 using GarminRunerz.Workout.Services.Models;
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
+using System.Threading.Tasks;
 using ToolBox.File;
+using ToolBox.File.Core;
+using WebUI.Mappers;
+using WebUI.Models;
 using WebUI.Services.Interfaces;
 using WebUI.Validators;
 
@@ -21,32 +25,10 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
         _logger.LogInformation("Loading csv information from stream ");        
         try
         {
-            var planning = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, line =>
-            {
-                return new CustomWorkout
-                {
-                    WeekNumber = int.Parse(line[0]),
-                    RunType = Enum.Parse<RunType>(line[1], true),
-                    TotalDuration = int.Parse(line[2]),
-                    Repetitions = int.Parse(line[3]),
-                    RunDuration = double.Parse(line[4]),
-                    CoolDownDuration = double.Parse(line[5]),
-                    Pace = decimal.Parse(line[6], CultureInfo.InvariantCulture),
-                    Speed = decimal.Parse(line[7], CultureInfo.InvariantCulture),
-                    Description = line[8]
-                };
-            }, new CustomWokoutValidator());
+            var planning = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWokoutValidator());
 
-            if(planning.IsSuccess is false)
-            {
-                throw planning.Exception!;
-            }
-            _logger.LogInformation("Loaded {Count} workouts from planning file.", planning.Value!.ValidCount);
+            LogResult(planning);
 
-            if(planning.Value.InvalidCount > 0)
-            {
-                _logger.LogWarning("Planning contains {InvalidCount} invalid workouts.", planning.Value.InvalidCount);
-            }
             return planning.Value.ValidEntities.ToList();
         }
         catch (Exception ex)
@@ -56,34 +38,35 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
         }
     }
 
-    public List<CustomWorkout> LoadPlanning(string filePath)
+    public async Task<List<CustomWorkout>> LoadPlanningFromFileAsync(string filePath)
     {
         _logger.LogInformation("Loading planning from CSV: {FilePath}", filePath);
         try
         {
-            var planning = CsvFileReader.ReadCsvFile(filePath, line =>
-            {
-                return new CustomWorkout
-                {
-                    WeekNumber = int.Parse(line[0]),
-                    RunType = Enum.Parse<RunType>(line[1], true),
-                    TotalDuration = int.Parse(line[2]),
-                    Repetitions = int.Parse(line[3]),
-                    RunDuration = double.Parse(line[4]),
-                    CoolDownDuration = double.Parse(line[5]),
-                    Pace = decimal.Parse(line[6], CultureInfo.InvariantCulture),
-                    Speed = decimal.Parse(line[7], CultureInfo.InvariantCulture),
-                    Description = line[8]
-                };
-            });
+            var planning = await CsvFileReader.ReadAndValidateCsv(filePath, CustomWorkoutMapper.FromCsvLine, new CustomWokoutValidator());
 
-            _logger.LogInformation("Loaded {Count} workouts from planning file.", planning.Count);
-            return planning;
+            LogResult(planning);
+
+            return planning.Value.ValidEntities.ToList();
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to load planning from {FilePath}", filePath);
             throw;
+        }
+    }
+
+    private void LogResult(Result<CsvValidationSummary<CustomWorkout>> results)
+    {
+        if (results.IsSuccess is false)
+        {
+            throw results.Exception!;
+        }
+        _logger.LogInformation("Loaded {Count} workouts from planning file.", results.Value!.ValidCount);
+
+        if (results.Value.InvalidCount > 0)
+        {
+            _logger.LogWarning("Planning contains {InvalidCount} invalid workouts.", results.Value.InvalidCount);
         }
     }
 }
