@@ -8,7 +8,9 @@ public class Athlete
     public Pace VmaPace { get; set; }
 
     private readonly TrainingTemplateCollection _trainingTemplates = [];
-    public TrainingTemplateCollection TrainingTemplates { get => _trainingTemplates; 
+    public TrainingTemplateCollection TrainingTemplates 
+    { 
+        get => _trainingTemplates; 
         set 
         {
             ArgumentNullException.ThrowIfNull(value);
@@ -17,7 +19,8 @@ public class Athlete
             {
                 _trainingTemplates.TryAdd(template);
             }
-        } }
+        } 
+    }
 
     public bool TryAddTemplate(TrainingTemplate template)
     {
