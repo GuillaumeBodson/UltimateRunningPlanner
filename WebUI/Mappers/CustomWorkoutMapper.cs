@@ -6,7 +6,12 @@ namespace WebUI.Mappers
     public static class CustomWorkoutMapper
     {
         public static CustomWorkout FromCsvLine(string[] line)
-            => new CustomWorkout
+        {
+            if(line.Length != 9)
+            {
+                throw new ArgumentException($"Invalid CSV line. Expected 9 fields but got {line.Length}.");
+            }
+            return new CustomWorkout
             {
                 WeekNumber = int.Parse(line[0]),
                 RunType = Enum.Parse<RunType>(line[1], true),
@@ -18,5 +23,6 @@ namespace WebUI.Mappers
                 Speed = decimal.Parse(line[7], CultureInfo.InvariantCulture),
                 Description = line[8]
             };
+        }
     }
 }

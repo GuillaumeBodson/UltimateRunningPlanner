@@ -25,7 +25,7 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
         _logger.LogInformation("Loading csv information from stream ");        
         try
         {
-            var planning = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWokoutValidator());
+            var planning = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
 
             LogResult(planning);
 
@@ -43,7 +43,7 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
         _logger.LogInformation("Loading planning from CSV: {FilePath}", filePath);
         try
         {
-            var planning = await CsvFileReader.ReadAndValidateCsv(filePath, CustomWorkoutMapper.FromCsvLine, new CustomWokoutValidator());
+            var planning = await CsvFileReader.ReadAndValidateCsv(filePath, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
 
             LogResult(planning);
 
