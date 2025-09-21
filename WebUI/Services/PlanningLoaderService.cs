@@ -1,7 +1,9 @@
 using GarminRunerz.Workout.Services.Models;
+using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using ToolBox.File;
 using WebUI.Services.Interfaces;
+using WebUI.Validators;
 
 namespace WebUI.Services;
 
@@ -19,7 +21,7 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
         _logger.LogInformation("Loading csv information from stream ");        
         try
         {
-            var planning = await CsvFileReader.ReadCsvFileContentAsync(fileStream, line =>
+            var planning = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, line =>
             {
                 return new CustomWorkout
                 {
@@ -33,10 +35,19 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
                     Speed = decimal.Parse(line[7], CultureInfo.InvariantCulture),
                     Description = line[8]
                 };
-            });
+            }, new CustomWokoutValidator());
 
-            _logger.LogInformation("Loaded {Count} workouts from planning file.", planning.Count);
-            return planning;
+            if(planning.IsSuccess is false)
+            {
+                throw planning.Exception!;
+            }
+            _logger.LogInformation("Loaded {Count} workouts from planning file.", planning.Value!.ValidCount);
+
+            if(planning.Value.InvalidCount > 0)
+            {
+                _logger.LogWarning("Planning contains {InvalidCount} invalid workouts.", planning.Value.InvalidCount);
+            }
+            return planning.Value.ValidEntities.ToList();
         }
         catch (Exception ex)
         {
