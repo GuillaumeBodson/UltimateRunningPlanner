@@ -7,7 +7,7 @@ namespace WebUI.Mappers
     {
         public static CustomWorkout FromCsvLine(string[] line)
         {
-            if(line.Length != 9)
+            if (line.Length != 9)
             {
                 throw new ArgumentException($"Invalid CSV line. Expected 9 fields but got {line.Length}.");
             }
