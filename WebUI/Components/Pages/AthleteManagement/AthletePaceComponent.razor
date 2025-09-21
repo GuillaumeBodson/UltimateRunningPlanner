@@ -1,0 +1,114 @@
+﻿@using WebUI.Models
+@using WebUI.Validators
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="page-title mb-3">Paces Refinement</MudText>
+    <MudPaper Class="p-4">
+        <MudForm @ref="_form" Model="@AthleteCreation">
+            <MudGrid Class="mb-2" GutterSize="GutterSize.Small">
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="Easy Pace"
+                                     Value="AthleteCreation.EasyPace" ValueChanged="OnEasyPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="Marathon Pace"
+                                     Value="AthleteCreation.MarathonPace" ValueChanged="OnMarathonPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="Semi-Marathon Pace"
+                                     Value="AthleteCreation.SemiMarathonPace" ValueChanged="OnSemiMarathonPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="VMA Pace"
+                                     Value="AthleteCreation.VmaPace" ValueChanged="OnVmaPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+            </MudGrid>
+        </MudForm>
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter, EditorRequired]
+    public AthleteCreation AthleteCreation { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<AthleteCreation> AthleteCreationChanged { get; set; }
+
+    private MudForm? _form;
+    private PaceValidator _validator = new();
+
+    // Track previous values to detect +/- (delta ≈ ±0.01)
+    private double _prevEasy, _prevMarathon, _prevSemi, _prevVma;
+
+    protected override void OnParametersSet()
+    {
+        _prevEasy = AthleteCreation.EasyPace;
+        _prevMarathon = AthleteCreation.MarathonPace;
+        _prevSemi = AthleteCreation.SemiMarathonPace;
+        _prevVma = AthleteCreation.VmaPace;
+    }
+
+    private async Task OnEasyPaceChanged(double v)
+    {
+        AthleteCreation.EasyPace = CoerceOnStepper(_prevEasy, v);
+        _prevEasy = AthleteCreation.EasyPace;
+        await AthleteCreationChanged.InvokeAsync(AthleteCreation);
+    }
+
+    private async Task OnMarathonPaceChanged(double v)
+    {
+        AthleteCreation.MarathonPace = CoerceOnStepper(_prevMarathon, v);
+        _prevMarathon = AthleteCreation.MarathonPace;
+        await AthleteCreationChanged.InvokeAsync(AthleteCreation);
+    }
+
+    private async Task OnSemiMarathonPaceChanged(double v)
+    {
+        AthleteCreation.SemiMarathonPace = CoerceOnStepper(_prevSemi, v);
+        _prevSemi = AthleteCreation.SemiMarathonPace;
+        await AthleteCreationChanged.InvokeAsync(AthleteCreation);
+    }
+
+    private async Task OnVmaPaceChanged(double v)
+    {
+        AthleteCreation.VmaPace = CoerceOnStepper(_prevVma, v);
+        _prevVma = AthleteCreation.VmaPace;
+        await AthleteCreationChanged.InvokeAsync(AthleteCreation);
+    }
+
+    private static double CoerceOnStepper(double prev, double next)
+    {
+        bool increment = next > prev;
+        bool isStepper = Math.Abs((next - prev) - 0.01d) < 1e-9 || Math.Abs((next - prev) + 0.01d) < 1e-9;
+        if (!isStepper) return next;
+
+        var minutes = (int)Math.Truncate(next);
+        var dec = Math.Abs(next - minutes);
+        var seconds = (int)Math.Round(dec * 100.0, MidpointRounding.ToZero);
+
+        if (seconds < 59) return next;
+
+        if (increment)
+        {
+            minutes += 1;
+            seconds = 0;
+        }
+        else
+        {
+            seconds = 59;
+        }
+        return Math.Round(minutes + seconds / 100.0, 2);
+    }
+}

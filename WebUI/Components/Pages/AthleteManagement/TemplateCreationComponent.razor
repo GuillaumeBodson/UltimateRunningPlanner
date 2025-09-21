@@ -1,0 +1,261 @@
+﻿@using WebUI.Models
+@using GarminRunerz.Workout.Services.Models
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6">
+    <MudText Typo="Typo.h4" Color="Color.Primary" Class="page-title mb-3">Training Templates</MudText>
+
+    <MudPaper Class="p-4 mb-4">
+        <MudText Typo="Typo.h6" Class="mb-3">Current Templates</MudText>
+
+        @if (TrainingTemplates?.Any() == true)
+        {
+            <MudGrid>
+                @foreach (var template in TrainingTemplates)
+                {
+                    <MudItem xs="12" md="6">
+                        <MudCard>
+                            <MudCardContent>
+                                <MudText Typo="Typo.subtitle1">@template.TrainingDaysCount-Day Template</MudText>
+                                <MudStack Spacing="1">
+                                    @foreach (var day in Enum.GetValues<DayOfWeek>())
+                                    {
+                                        var runType = template[day];
+                                        <MudText Typo="Typo.body2">
+                                            <strong>@day:</strong> @(FormatRunType(runType))
+                                        </MudText>
+                                    }
+                                </MudStack>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Size="Size.Small" Color="Color.Error"
+                                           OnClick="() => RemoveTemplate(template.TrainingDaysCount)">
+                                    Remove
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
+        else
+        {
+            <MudAlert Severity="Severity.Info">No custom templates created yet.</MudAlert>
+        }
+    </MudPaper>
+
+    <MudPaper Class="p-4">
+        <MudText Typo="Typo.h6" Class="mb-3">Create New Template</MudText>
+
+        <MudGrid>
+            @foreach (var day in Enum.GetValues<DayOfWeek>())
+            {
+                var selected = GetSelected(day);
+                <MudItem xs="12">
+                    <MudCard Variant="Variant.Outlined" Class="pa-3">
+                        <MudCardContent Class="pb-0">
+                            <MudText Typo="Typo.subtitle1" Class="mb-2">@day</MudText>
+                            
+                            <MudStack Row="true" Wrap="Wrap.Wrap" Spacing="1">
+                                <MudCheckBox T="bool" Label="Rest"
+                                             Value="@(selected.Count == 0)"
+                                             ValueChanged="@(isChecked => ToggleRest(day, isChecked))"
+                                             Color="Color.Secondary" />
+                                
+                                @foreach (RunType runType in GetAvailableRunTypes())
+                                {
+                                    <MudCheckBox T="bool" Label="@runType.ToString()"
+                                                 Value="@(selected.Contains(runType))"
+                                                 ValueChanged="@(isChecked => ToggleRunType(day, runType, isChecked))"
+                                                 Color="Color.Primary"
+                                                 Disabled="@(CanBeSelected(selected, runType))" />
+                                }
+                            </MudStack>
+
+                            @if (selected.Count > 0)
+                            {
+                                <MudChipSet @bind-SelectedValues="_selectedRunTypes" Class="mt-2">
+                                    @foreach (var selected in selected)
+                                    {
+                                        <MudChip Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small">
+                                            @selected
+                                        </MudChip>
+                                    }
+                                </MudChipSet>
+                            }
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+
+        <MudStack Row="true" Class="mt-4" Spacing="2">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled"
+                       OnClick="AddTemplate" Disabled="@(!CanAddTemplate)">
+                Add Template
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="ClearNewTemplate">
+                Clear
+            </MudButton>
+        </MudStack>
+
+        @if (!string.IsNullOrWhiteSpace(_validationMessage))
+        {
+            <MudAlert Severity="Severity.Warning" Class="mt-2">@_validationMessage</MudAlert>
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    [Parameter, EditorRequired]
+    public TrainingTemplateCollection TrainingTemplates { get; set; } = new();
+
+    [Parameter]
+    public EventCallback TrainingTemplatesChanged { get; set; }
+
+    private IReadOnlyCollection<KeyValuePair<DayOfWeek, HashSet<RunType>>> _selectedRunTypes = [];
+    private string? _validationMessage;
+
+    private bool CanAddTemplate => _selectedRunTypes.Any(set => set.Value.Count > 0);
+
+    private HashSet<RunType> GetSelected(DayOfWeek day) 
+        => _selectedRunTypes.First(x => x.Key == day).Value;
+
+    private bool CanBeSelected(HashSet<RunType> selectedDay, RunType runType)
+    {
+        return selectedDay.Count == 0 ? false : !selectedDay.Contains(runType) && selectedDay.Count == 0;
+    }
+
+    protected override void OnInitialized()
+    {
+        InitializeNewTemplate();
+    }
+
+    private void InitializeNewTemplate()
+    {
+        _selectedRunTypes = Enum.GetValues<DayOfWeek>()
+            .ToDictionary(d => d, _ => new HashSet<RunType>());
+    }
+
+    private void ToggleRest(DayOfWeek day, bool isRest)
+    {
+        if (isRest)
+        {
+            GetSelected(day).Clear();
+        }
+        ValidateTemplate();
+        StateHasChanged();
+    }
+
+    private void ToggleRunType(DayOfWeek day, RunType runType, bool isSelected)
+    {
+        if (isSelected)
+        {
+            GetSelected(day).Add(runType);
+        }
+        else
+        {
+            GetSelected(day).Remove(runType);
+        }
+
+        ValidateTemplate();
+        StateHasChanged();
+    }
+
+    private static RunType[] GetAvailableRunTypes()
+    {
+        return Enum.GetValues<RunType>()
+            .Where(rt => rt != 0) // Exclude default/None value if it exists
+            .ToArray();
+    }
+
+    private static string FormatRunType(RunType? runType)
+    {
+        if (runType == null) return "Rest";
+
+        // Handle flags enum formatting
+        var flags = Enum.GetValues<RunType>()
+            .Where(rt => rt != 0 && runType.Value.HasFlag(rt))
+            .Select(rt => rt.ToString());
+
+        return string.Join(" + ", flags);
+    }
+
+    private RunType? CombineSelectedRunTypes(DayOfWeek day)
+    {
+        if (GetSelected(day).Count == 0) return null;
+
+        RunType combined = 0;
+        foreach (var runType in GetSelected(day))
+        {
+            combined |= runType;
+        }
+        return combined;
+    }
+
+    private void ValidateTemplate()
+    {
+        _validationMessage = null;
+        try
+        {
+            var builder = TrainingTemplate.CreateBuilder();
+            foreach (var day in Enum.GetValues<DayOfWeek>())
+            {
+                var combinedRunType = CombineSelectedRunTypes(day);
+                if (combinedRunType.HasValue)
+                    builder.With(day, combinedRunType.Value);
+                else
+                    builder.Rest(day);
+            }
+            builder.Build();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _validationMessage = ex.Message;
+        }
+    }
+
+    private async Task AddTemplate()
+    {
+        try
+        {
+            var builder = TrainingTemplate.CreateBuilder();
+            foreach (var day in Enum.GetValues<DayOfWeek>())
+            {
+                var combinedRunType = CombineSelectedRunTypes(day);
+                if (combinedRunType.HasValue)
+                    builder.With(day, combinedRunType.Value);
+                else
+                    builder.Rest(day);
+            }
+
+            var template = builder.Build();
+
+            if (TrainingTemplates.TryAdd(template))
+            {
+                await TrainingTemplatesChanged.InvokeAsync();
+                InitializeNewTemplate();
+                StateHasChanged();
+            }
+        }
+        catch (InvalidOperationException ex)
+        {
+            _validationMessage = ex.Message;
+        }
+    }
+
+    private async Task RemoveTemplate(int trainingDays)
+    {
+        if (TrainingTemplates.Remove(trainingDays))
+        {
+            await TrainingTemplatesChanged.InvokeAsync();
+            StateHasChanged();
+        }
+    }
+
+    private void ClearNewTemplate()
+    {
+        InitializeNewTemplate();
+        _validationMessage = null;
+        StateHasChanged();
+    }
+}
