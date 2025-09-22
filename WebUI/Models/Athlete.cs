@@ -7,29 +7,7 @@ public class Athlete
     public Pace SemiMarathonPace { get; set; }
     public Pace VmaPace { get; set; }
 
-    private readonly TrainingTemplateCollection _trainingTemplates = [];
-    public TrainingTemplateCollection TrainingTemplates 
-    { 
-        get => _trainingTemplates; 
-        set 
-        {
-            ArgumentNullException.ThrowIfNull(value);
-            _trainingTemplates.Clear();
-            foreach (var template in value)
-            {
-                _trainingTemplates.TryAdd(template);
-            }
-        } 
-    }
-
-    public bool TryAddTemplate(TrainingTemplate template)
-    {
-        ArgumentNullException.ThrowIfNull(template);
-        return _trainingTemplates.TryAdd(template);
-    }
-
-    public TrainingTemplate? GetTemplateForTrainingDays(int trainingDays) =>
-        _trainingTemplates.GetForTrainingDays(trainingDays);
+    public HashSet<TrainingTemplate> TrainingTemplates { get; set; } = [];
 }
 
 public class AthleteCreation
