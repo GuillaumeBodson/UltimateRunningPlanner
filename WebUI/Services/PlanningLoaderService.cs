@@ -1,11 +1,7 @@
 using GarminRunerz.Workout.Services.Models;
-using System.ComponentModel.DataAnnotations;
-using System.Globalization;
-using System.Threading.Tasks;
 using ToolBox.File;
 using ToolBox.File.Core;
 using WebUI.Mappers;
-using WebUI.Models;
 using WebUI.Services.Interfaces;
 using WebUI.Validators;
 

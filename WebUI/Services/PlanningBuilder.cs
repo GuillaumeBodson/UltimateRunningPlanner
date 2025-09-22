@@ -28,7 +28,7 @@ public class PlanningBuilder : IPlanningBuilder
         foreach (var weekGroup in planning.BaseWorkouts.GroupBy(w => w.WeekNumber).OrderBy(g => g.Key))
         {
             int numberOfTrainingDays = weekGroup.Count();
-            var template = athlete.GetTemplateForTrainingDays(numberOfTrainingDays)
+            var template = athlete.TrainingTemplates.FirstOrDefault(t => t.TrainingDaysCount == numberOfTrainingDays)
                 ?? ResolveDefaultTemplate(numberOfTrainingDays);
 
             planning.Template.TryAdd(template);
