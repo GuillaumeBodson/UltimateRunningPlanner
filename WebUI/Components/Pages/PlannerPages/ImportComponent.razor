@@ -83,7 +83,7 @@
             var workouts = await PlanningLoaderService.LoadPlanningAsync(stream);
             var count = workouts?.Count ?? 0;
 
-            if(count > 0 && WorkoutLoaded.HasDelegate)
+            if (count > 0 && WorkoutLoaded.HasDelegate)
             {
                 await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts));
             }
