@@ -62,10 +62,10 @@
         if (firstRender)
         {
             // Load previously saved start date if present
-            var fomrstorage = await localStorage.GetItemAsync<DateOnly?>(Constants.StartDateKey);
-            if (fomrstorage.HasValue)
+            var fromStorage = await localStorage.GetItemAsync<DateOnly?>(Constants.StartDateKey);
+            if (fromStorage.HasValue)
             {
-                _startDateTime = fomrstorage.Value.ToDateTime(TimeOnly.MinValue);
+                _startDateTime = fromStorage.Value.ToDateTime(TimeOnly.MinValue);
             }
             StateHasChanged();
         }
