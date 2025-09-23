@@ -36,7 +36,7 @@
         </MudTabs>
 
         <MudStack Row="true" Class="mt-4" Spacing="2" AlignItems="AlignItems.Center">
-            <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(_workouts is null || _startDateTime is null || _workouts is null)"
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(_workouts is null || _startDateTime is null)"
                        OnClick="BuildPlanningAsync" StartIcon="@Icons.Material.Filled.Save">
                 Build Planning
             </MudButton>
