@@ -1,0 +1,105 @@
+﻿@using System.Globalization
+@using GarminRunerz.Workout.Services.Models
+@using WebUI.Models
+@using WebUI.Services.Interfaces
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject ISnackbar Snackbar
+@inject IPlanningLoaderService PlanningLoaderService
+@rendermode InteractiveServer
+
+<MudPaper Class="p-4">
+    <MudStack Spacing="3">
+        <MudText Typo="Typo.subtitle1">1) Select start date</MudText>
+        <MudDatePicker Label="Start date"
+                       @bind-Date="_startDateTime"
+                       DateFormat="dd/MM/yyyy"
+                       CloseToEdges="true"
+                       OpenTo="OpenTo.Date"
+                       Variant="Variant.Outlined"
+                       PickerVariant="PickerVariant.Static"
+                       DisableToolbar="true"
+                       onchange="OnDatePickerClosed" />
+
+        @if (_startDateTime is not null)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true">
+                Start date: @(_startDateTime!.Value.ToString("D", CultureInfo.CurrentCulture))
+            </MudAlert>
+        }
+
+        <MudDivider Class="my-2" />
+
+        <MudText Typo="Typo.subtitle1">2) Import CSV planning</MudText>
+
+        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+            <InputFile OnChange="LoadFile" accept=".csv" />
+            <MudText Typo="Typo.caption" Class="text-muted">Accepted: .csv</MudText>
+        </MudStack>
+
+        @if (_isLoading)
+        {
+            <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-2" />
+        }
+
+        @if (_lastImportSummary is not null)
+        {
+            <MudAlert Severity="Severity.Success" Class="mt-2">
+                @_lastImportSummary
+            </MudAlert>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    private DateTime? _startDateTime;
+    private bool _isLoading;
+    private string? _lastImportSummary;
+    [Parameter]
+    public EventCallback<(DateOnly startDate, List<CustomWorkout> workouts)> WorkoutLoaded { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Load previously saved start date if present
+            var fromStorage = await localStorage.GetItemAsync<DateOnly?>(Constants.StartDateKey);
+            if (fromStorage.HasValue)
+            {
+                _startDateTime = fromStorage.Value.ToDateTime(TimeOnly.MinValue);
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        _isLoading = true;
+        _lastImportSummary = null;
+        try
+        {
+            var file = e.File;
+            using var stream = file.OpenReadStream();
+
+            var workouts = await PlanningLoaderService.LoadPlanningAsync(stream);
+            var count = workouts?.Count ?? 0;
+
+            if (count > 0 && WorkoutLoaded.HasDelegate)
+            {
+                await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts));
+            }
+
+            _lastImportSummary = $"Imported {count} workouts from “{file.Name}”.";
+            Snackbar.Add(_lastImportSummary, Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to import: {ex.Message}", Severity.Error);
+            _lastImportSummary = "Import failed.";
+        }
+        finally
+        {
+            _isLoading = false;
+            StateHasChanged();
+        }
+    }
+}

@@ -14,7 +14,7 @@ public class PlanningBuilder : IPlanningBuilder
         _workoutCreator = workoutCreator;
     }
 
-    public Planning BuildPlanning(DateOnly startDate, List<CustomWorkout> workouts, Athlete athlete)
+    public Planning BuildPlanning(DateOnly startDate, List<CustomWorkout> workouts, Athlete athlete, List<TrainingTemplate>? trainingTemplates = null)
     {
         var planning = new Planning
         {
@@ -28,7 +28,7 @@ public class PlanningBuilder : IPlanningBuilder
         foreach (var weekGroup in planning.BaseWorkouts.GroupBy(w => w.WeekNumber).OrderBy(g => g.Key))
         {
             int numberOfTrainingDays = weekGroup.Count();
-            var template = athlete.TrainingTemplates.FirstOrDefault(t => t.TrainingDaysCount == numberOfTrainingDays)
+            var template = trainingTemplates?.FirstOrDefault(t => t.TrainingDaysCount == numberOfTrainingDays)
                 ?? ResolveDefaultTemplate(numberOfTrainingDays);
 
             planning.Template.TryAdd(template);

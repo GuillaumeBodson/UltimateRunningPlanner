@@ -1,0 +1,182 @@
+﻿@using WebUI.Models
+@using GarminRunerz.Workout.Services.Models
+
+<MudPaper Class="p-4">
+    <MudStack Spacing="2">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudText Typo="Typo.h6">Select Training Templates</MudText>
+            <MudSpacer />
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" Disabled="@(!_canSelectAny)" OnClick="SelectAll">
+                Select All
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Size="Size.Small" Disabled="@(!_hasSelection)" OnClick="ClearSelection">
+                Clear
+            </MudButton>
+        </MudStack>
+
+        @if (TrainingTemplatesFromAthlete is null || TrainingTemplatesFromAthlete.Count == 0)
+        {
+            <MudAlert Severity="Severity.Info" Dense="true">
+                No templates available. Define them on the Athlete page first.
+            </MudAlert>
+        }
+        else
+        {
+            <MudTable Items="TrainingTemplatesFromAthlete"
+                      Hover="true"
+                      Dense="true"
+                      MultiSelection="true"
+                      @bind-SelectedItems="_selected"
+                      Elevation="2"
+                      Breakpoint="Breakpoint.Sm"
+                      Class="mb-2">
+                <ToolBarContent>
+                    <MudText Typo="Typo.subtitle2">@_selected.Count selected</MudText>
+                </ToolBarContent>
+                <HeaderContent>
+                    <MudTh>Days</MudTh>
+                    <MudTh>Quality Days</MudTh>
+                    <MudTh>Long Run</MudTh>
+                    <MudTh>Details</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Days">@context.TrainingDaysCount</MudTd>
+                    <MudTd DataLabel="Quality Days">@CountQualityDays(context)</MudTd>
+                    <MudTd DataLabel="Long Run">@HasLongRun(context)</MudTd>
+                    <MudTd DataLabel="Details">
+                        <MudExpansionPanels Elevation="0" Dense="true">
+                            <MudExpansionPanel DisableRipple="true" DisableGutters="true">
+                                <ChildContent>
+                                    <MudList T="DayOfWeek" Dense="true">
+                                        @foreach (var d in _orderedDays)
+                                        {
+                                            var mask = context[d];
+                                            <MudListItem>
+                                                <MudText Typo="Typo.caption">
+                                                    <strong>@d:</strong> @FormatMask(mask)
+                                                </MudText>
+                                            </MudListItem>
+                                        }
+                                    </MudList>
+                                </ChildContent>
+                            </MudExpansionPanel>
+                        </MudExpansionPanels>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+
+        <MudDivider />
+
+        <MudText Typo="Typo.subtitle2">Selected Summary</MudText>
+        @if (_selected.Count == 0)
+        {
+            <MudText Typo="Typo.caption" Class="text-muted">No templates selected.</MudText>
+        }
+        else
+        {
+            <MudChipSet T="TrainingTemplate">
+                @foreach (var tpl in _selected.OrderBy(t => t.TrainingDaysCount))
+                {
+                    <MudChip Color="Color.Primary" Variant="Variant.Filled" Size="Size.Small">
+                        @tpl.TrainingDaysCount d (Q:@CountQualityDays(tpl), LR:@HasLongRun(tpl))
+                    </MudChip>
+                }
+            </MudChipSet>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    private static readonly DayOfWeek[] _orderedDays =
+    [
+        DayOfWeek.Monday,
+        DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday,
+        DayOfWeek.Thursday,
+        DayOfWeek.Friday,
+        DayOfWeek.Saturday,
+        DayOfWeek.Sunday
+    ];
+
+    [Parameter] public List<TrainingTemplate>? TrainingTemplatesFromAthlete { get; set; }
+
+    // Two-way binding pattern
+    [Parameter] public List<TrainingTemplate>? SelectedTrainingTemplates { get; set; }
+    [Parameter] public EventCallback<List<TrainingTemplate>> SelectedTrainingTemplatesChanged { get; set; }
+
+    // Internal selection store used by MudTable (HashSet required)
+    private HashSet<TrainingTemplate> _selected = new();
+
+    private bool _canSelectAny => TrainingTemplatesFromAthlete is { Count: > 0 };
+    private bool _hasSelection => _selected.Count > 0;
+
+    protected override void OnParametersSet()
+    {
+        if (SelectedTrainingTemplates is not null && SelectedTrainingTemplates.Count > 0)
+        {
+            // Sync initial selection
+            _selected = SelectedTrainingTemplates.ToHashSet();
+        }
+    }
+
+    private async Task PropagateSelectionAsync()
+    {
+        SelectedTrainingTemplates = _selected.ToList();
+        if (SelectedTrainingTemplatesChanged.HasDelegate)
+            await SelectedTrainingTemplatesChanged.InvokeAsync(SelectedTrainingTemplates);
+    }
+
+    private async Task SelectAll()
+    {
+        if (TrainingTemplatesFromAthlete is null) return;
+        _selected = TrainingTemplatesFromAthlete.ToHashSet();
+        await PropagateSelectionAsync();
+    }
+
+    private async Task ClearSelection()
+    {
+        _selected.Clear();
+        await PropagateSelectionAsync();
+    }
+
+    // MudTable two-way binding hook
+    private async Task OnSelectionChanged(HashSet<TrainingTemplate> _)
+    {
+        await PropagateSelectionAsync();
+        StateHasChanged();
+    }
+
+    private static string FormatMask(RunType? mask)
+    {
+        if (mask is null) return "Rest";
+        var flags = Enum.GetValues<RunType>()
+            .Where(f => f != 0 && mask.Value.HasFlag(f))
+            .ToList();
+        return flags.Count == 0 ? "Rest" : string.Join(" | ", flags);
+    }
+
+    private static int CountQualityDays(TrainingTemplate tpl)
+    {
+        var qualityMask = RunType.Intervals | RunType.Tempo;
+        int count = 0;
+        foreach (var d in _orderedDays)
+        {
+            var m = tpl[d];
+            if (m is { } r && (r & qualityMask) != 0)
+                count++;
+        }
+        return count;
+    }
+
+    private static string HasLongRun(TrainingTemplate tpl)
+    {
+        foreach (var d in _orderedDays)
+        {
+            var m = tpl[d];
+            if (m is { } r && (r & RunType.LongRun) != 0)
+                return "Yes";
+        }
+        return "No";
+    }
+}

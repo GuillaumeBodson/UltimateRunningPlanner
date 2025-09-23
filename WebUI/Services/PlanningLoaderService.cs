@@ -29,7 +29,7 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to load planning from stream", fileStream);
+            _logger.LogError(ex, "Failed to load planning from stream");
             throw;
         }
     }
