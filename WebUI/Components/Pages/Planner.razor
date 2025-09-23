@@ -1,0 +1,102 @@
+﻿@page "/planner"
+@using GarminRunerz.Workout.Services.Models
+@using WebUI.Components.Pages.PlannerPages
+@using WebUI.Models
+@using WebUI.Services.Interfaces
+@inject Blazored.LocalStorage.ILocalStorageService localStorage
+@inject ISnackbar Snackbar
+@inject IPlanningLoaderService PlanningLoaderService
+@inject IAthleteSession AthleteSession
+@inject IPlanningBuilder PlanningBuilder
+@rendermode InteractiveServer
+
+<PageTitle>Planner</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Medium" Class="py-6" >
+    <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3"> Planner</MudText>
+
+
+    @if(_athlete is null)
+    {
+        <MudAlert Severity="Severity.Warning" Dense="true" Class="mb-4">
+            No athlete loaded. Please go to the Home page to load or create an athlete profile.
+        </MudAlert>
+    }
+    else
+    {
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+            <MudTabPanel Text="Import">
+                <ImportComponent workoutLoaded="OnWorkoutLoaded" />
+            </MudTabPanel>
+            <MudTabPanel Text="Training Templates" Disabled="@(_athlete is null || _athlete.TrainingTemplates.Count == 0)">
+                <TemplateSelectorComponent TrainingTemplatesFromAthlete="@_athlete?.TrainingTemplates?.ToList()"
+                                           SelectedTrainingTemplates="@_trainingTemplates"
+                                           SelectedTrainingTemplatesChanged="OnTrainingTemplatesChanged" />
+            </MudTabPanel>
+        </MudTabs>
+
+        <MudStack Row="true" Class="mt-4" Spacing="2" AlignItems="AlignItems.Center">
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" Disabled="@(_workouts is null || _startDateTime is null || _workouts is null)"
+                       OnClick="BuildPlanningAsync" StartIcon="@Icons.Material.Filled.Save">
+                Build Planning
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" OnClick="Reset"
+                       StartIcon="@Icons.Material.Filled.Restore">
+                Reset
+            </MudButton>
+            <MudSpacer />
+        </MudStack>
+    }
+
+    
+</MudContainer>
+
+@code {
+    private DateOnly? _startDateTime;
+    private bool _isLoading;
+    private string? _lastImportSummary;
+    private Athlete? _athlete;
+    private List<CustomWorkout>? _workouts;
+    private List<TrainingTemplate>? _trainingTemplates;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _athlete = await AthleteSession.GetAndSetAsync();
+            StateHasChanged();
+        }
+    }
+
+    private void OnWorkoutLoaded((DateOnly startDate, List<CustomWorkout> workouts) args)
+    {
+        (_startDateTime, _workouts) = (args.startDate, args.workouts);
+        StateHasChanged();
+    }
+    private void OnTrainingTemplatesChanged(List<TrainingTemplate> templates)
+    {
+        _trainingTemplates = templates;
+    }
+
+    private async Task BuildPlanningAsync(MouseEventArgs args)
+    {
+        try
+        {
+            var planning = PlanningBuilder.BuildPlanning(_startDateTime!.Value, _workouts!, _athlete!, _trainingTemplates);
+            await localStorage.SetItemAsync(Constants.PlanningKey, planning);
+            Snackbar.Add("Planning saved successfully", Severity.Success);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("Failed to save planning", Severity.Error);
+            throw;
+        }
+    }
+    private void Reset(MouseEventArgs args)
+    {
+        _startDateTime = null;
+        _workouts = null;
+        _trainingTemplates = null;
+        Snackbar.Add("Planning reset", Severity.Info);
+    }
+}
