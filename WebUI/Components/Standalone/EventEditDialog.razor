@@ -53,7 +53,7 @@
     private void OnRunTypeChanged(RunType args)
     {
         _model.RunType = args;
-        if((args & (RunType.Easy | RunType.Race | RunType.Recovery)) !=0)
+        if ((args & (RunType.Easy | RunType.Race | RunType.Recovery)) !=0)
         {
             _model.Repetitions = 0;
             _model.RunDuration = 0;
