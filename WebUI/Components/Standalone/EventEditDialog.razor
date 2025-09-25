@@ -1,0 +1,68 @@
+﻿@using GarminRunerz.Workout.Services.Models
+@using MudBlazor
+@using System.MudPlanner
+@using WebUI.Models.Workouts
+@inherits ComponentBase
+@namespace BlazorApp.Components
+
+
+<MudDialog CloseOnEscapeKey="true" MaxWidth="MaxWidth.Small" Position="DialogPosition.Center">
+    <DialogContent>
+        <MudForm @ref="_form">
+            <MudText Typo="Typo.h6" Class="mb-2">New event for @Date.ToString("D")</MudText>
+
+            <MudNumericField @bind-Value="_model.Repetitions" Label="Repetitions" Required="true" Disabled="_isRepetitionDisable" />
+            <MudNumericField @bind-Value="_model.RunDuration" Label="Effort duration (s)" Required="true" Disabled="_isRepetitionDisable" />
+            <MudNumericField @bind-Value="_model.CoolDownDuration" Label="Cool down duration (s)" Required="true" Disabled="_isRepetitionDisable" />
+            <MudNumericField @bind-Value="_model.TotalDuration" Label="Total duration (s)" Required="true"  />
+
+            <MudTextField @bind-Value="_model.Description" Label="Description" Lines="3" />
+
+            <MudSelect T="RunType"  Label="Run Type" ValueChanged="OnRunTypeChanged" Required="true">
+                @foreach (var c in Enum.GetValues<RunType>())
+                {
+                    <MudSelectItem Value="c">@c</MudSelectItem>
+                }
+            </MudSelect>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default">Cancel</MudButton>
+        <MudButton OnClick="Save" Color="Color.Primary" Variant="Variant.Filled">Save</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public DateOnly Date { get; set; }
+
+    private MudForm? _form;
+    private readonly CustomWorkoutModel _model = new() { RunType = RunType.Easy };
+    private bool _isRepetitionDisable = true;
+
+    private async Task Save()
+    {
+        if (_form is null) return;
+        await _form.Validate();
+        if (_form.IsValid)
+            MudDialog.Close(DialogResult.Ok(_model));
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private void OnRunTypeChanged(RunType args)
+    {
+        _model.RunType = args;
+        if ((args & (RunType.Easy | RunType.Race | RunType.Recovery)) !=0)
+        {
+            _model.Repetitions = 0;
+            _model.RunDuration = 0;
+            _model.CoolDownDuration = 0;
+            _isRepetitionDisable = true;
+        }
+        else
+        {
+            _isRepetitionDisable = false;
+        }
+    }
+}

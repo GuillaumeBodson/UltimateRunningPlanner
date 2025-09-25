@@ -33,4 +33,19 @@ public class Planning
         }).ToList();
 
     public Athlete Athlete { get; set; }
+
+    public int GetWeekNumber(DateOnly date)
+    {
+        if (date < StartDate)
+            throw new ArgumentOutOfRangeException(nameof(date), "date cannot be before startDate.");
+
+        var lastDay = Workouts.Max(w => w.Date);
+
+        if (date > lastDay)
+            throw new ArgumentOutOfRangeException(nameof(date), "date cannot be after the last planned workout.");
+
+        int daysDifference = date.DayNumber - StartDate.DayNumber;
+        return (daysDifference / 7) + 1;
+    }
+        
 }

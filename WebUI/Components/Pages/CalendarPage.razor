@@ -3,21 +3,29 @@
 
 @using System.Collections.ObjectModel
 @using System.MudPlanner
+@using BlazorApp.Components
 @using BlazorLibraries.MudPlanner
 @using GarminRunerz.Workout.Services.Models
 @using Toolbox.Utilities
+@using WebUI.Mappers
 @using WebUI.Models
+@using WebUI.Models.Workouts
 @using WebUI.Services
 @using WebUI.Services.Interfaces
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IAthleteSession AthleteSession
+@inject IDialogService Dialog
+@inject IPlannedWorkoutFactory WorkoutCreator
+@inject ISnackbar Snackbar
+@inject ILogger<CalendarPage> Logger
 
 <PageTitle>Calendar</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
     <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Calendar</MudText>
 
     <CalendarComponent @bind-Planning="CalendarEvents" @bind-WeekRecaps="WeekRecaps" HasWeekRecap="true"
-                       OnPlanningSaveCallback="PlanningSave" />
+                       OnPlanningSaveCallback="PlanningSave" 
+                       CreateEventAsync="CreateEventAsync"/>
 
 </MudContainer>
 
@@ -50,19 +58,10 @@
         StateHasChanged();
     }
 
-    // To move
-    private int GetWeekNumber(DateOnly eventDate)
-    {
-        if (eventDate < _planningStartDate)
-            throw new ArgumentOutOfRangeException(nameof(eventDate), "eventDate cannot be before startDate.");
-
-        int daysDifference = eventDate.DayNumber - _planningStartDate.DayNumber;
-        return (daysDifference / 7) + 1;
-    }
     private async void PlanningSave((DateOnly date, CalendarEvent ev) args)
     {
         var workout = _planning.BaseWorkouts!.FirstOrDefault(w => w.Id == args.ev.Id);
-        var weekNumber = GetWeekNumber(args.ev.Date);
+        var weekNumber = _planning.GetWeekNumber(args.ev.Date);
         workout!.WeekNumber = weekNumber;
 
         var plannedWorkout = _planning.Workouts.FirstOrDefault(w => w.Id == args.ev.Id);
@@ -70,5 +69,89 @@
         plannedWorkout.Date = args.ev.Date;
 
         await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+    }
+
+    private async Task<CalendarEvent?> CreateEventAsync(DateOnly date)
+    {
+        try
+        {
+            // Ensure planning is loaded
+            if (_planning is null)
+            {
+                Snackbar.Add("No planning loaded. Please build or load a planning first.", Severity.Error);
+                return null;
+            }
+            
+            int weekNumber;
+            try
+            {
+                weekNumber = _planning.GetWeekNumber(date);
+            }
+            catch (ArgumentOutOfRangeException ex)
+            {
+                Snackbar.Add(ex.Message, Severity.Warning);
+                Logger.LogWarning(ex, "CreateEventAsync rejected date {Date}", date);
+                return null;
+            }
+
+            var model = await OpenDialogAsync(date);
+            if (model is null) return null;
+
+            // Safe ID generation (aligned with PlanningBuilder seed logic)
+            var id = NextIdForWeek(weekNumber);
+
+            // Map + add to BaseWorkouts and Workouts
+            var workout = model.ToCustomWorkout(weekNumber, _planning.Athlete, id);
+            _planning.BaseWorkouts.Add(workout);
+
+            var planned = WorkoutCreator.Create(workout, _planning.Athlete, date);
+            _planning.Workouts.Add(planned);
+
+            // Persist planning
+            await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+
+            StateHasChanged();
+            Snackbar.Add("Event created", Severity.Success);
+
+            return planned.ToCalendarEvent();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "CreateEventAsync failed for date {Date}", date);
+            Snackbar.Add("Failed to create event. See logs for details.", Severity.Error);
+            return null;
+        }
+    }
+
+    private int NextIdForWeek(int weekNumber)
+    {
+        // Base seed consistent with PlanningBuilder: (week + 9) * 100
+        var baseSeed = (weekNumber + 9) * 100;
+        var maxIdInWeek = _planning!.Workouts
+            .Where(w => w.WeekNumber == weekNumber)
+            .Select(w => w.Id)
+            .DefaultIfEmpty(baseSeed - 1) // ensures at least baseSeed on first insert
+            .Max();
+
+        // Ensure monotonic increase and keep inside the week’s ID band
+        return Math.Max(maxIdInWeek + 1, baseSeed);
+    }
+
+    private async Task<CustomWorkoutModel?> OpenDialogAsync(DateOnly date)
+    {
+        // Open dialog to collect workout data
+        var parameters = new DialogParameters<EventEditDialog>
+        {
+            [nameof(EventEditDialog.Date)] = date
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true };
+        var dialog = await Dialog.ShowAsync<EventEditDialog>("Create event", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is null || result.Canceled || result.Data is not CustomWorkoutModel model)
+            return null;
+
+        return model;
     }
 }
