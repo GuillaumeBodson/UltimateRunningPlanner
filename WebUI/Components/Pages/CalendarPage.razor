@@ -3,21 +3,27 @@
 
 @using System.Collections.ObjectModel
 @using System.MudPlanner
+@using BlazorApp.Components
 @using BlazorLibraries.MudPlanner
 @using GarminRunerz.Workout.Services.Models
 @using Toolbox.Utilities
+@using WebUI.Mappers
 @using WebUI.Models
+@using WebUI.Models.Workouts
 @using WebUI.Services
 @using WebUI.Services.Interfaces
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IAthleteSession AthleteSession
+@inject IDialogService Dialog
+@inject IPlannedWorkoutFactory WorkoutCreator;
 
 <PageTitle>Calendar</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
     <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Calendar</MudText>
 
     <CalendarComponent @bind-Planning="CalendarEvents" @bind-WeekRecaps="WeekRecaps" HasWeekRecap="true"
-                       OnPlanningSaveCallback="PlanningSave" />
+                       OnPlanningSaveCallback="PlanningSave" 
+                       CreateEventAsync="CreateEventAsync"/>
 
 </MudContainer>
 
@@ -70,5 +76,32 @@
         plannedWorkout.Date = args.ev.Date;
 
         await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+    }
+    private async Task<CalendarEvent?> CreateEventAsync(DateOnly date)
+    {
+        var parameters = new DialogParameters<EventEditDialog.EventModel>
+        {
+            [nameof(EventEditDialog.Date)] = date
+        };
+
+        var options = new DialogOptions { CloseButton = true, FullWidth = true };
+        var dialog = await Dialog.ShowAsync<EventEditDialog>("Create event", parameters, options);
+
+        DialogResult? result = await dialog.Result;
+
+        if (result is null || result.Canceled || !(result.Data is CustomWorkoutModel model)) return null;
+
+        var nbDaysFromStartDay = date.DayNumber - _planningStartDate.DayNumber;
+        var weekNumber = (nbDaysFromStartDay / 7) + 1;
+        var id = _planning!.Workouts.Where(x => x.WeekNumber == weekNumber).Max(x => x.Id) + 1;
+        var workout = model.ToCustomWorkout(weekNumber, _planning.Athlete, id);
+        _planning.BaseWorkouts.Add(workout);
+
+        var planned = WorkoutCreator.Create(workout, _planning.Athlete, date);
+        _planning.Workouts.Add(planned);
+
+        StateHasChanged();
+
+        return planned.ToCalendarEvent();
     }
 }
