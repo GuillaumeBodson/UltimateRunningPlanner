@@ -140,7 +140,7 @@
     private async Task<CustomWorkoutModel?> OpenDialogAsync(DateOnly date)
     {
         // Open dialog to collect workout data
-        var parameters = new DialogParameters<EventEditDialog.EventModel>
+        var parameters = new DialogParameters<EventEditDialog>
         {
             [nameof(EventEditDialog.Date)] = date
         };
