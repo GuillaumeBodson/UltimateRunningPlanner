@@ -93,7 +93,7 @@
 
             if (count > 0 && WorkoutLoaded.HasDelegate)
             {
-                await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts!));
+                await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts));
             }
 
             _lastImportSummary = $"Imported {count} workouts from “{file.Name}”.";

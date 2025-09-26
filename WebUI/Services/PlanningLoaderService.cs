@@ -18,9 +18,9 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
         {
             var validationResult = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
 
-            LogResult(validationResult);
+            var result = ProcessValidationResult(validationResult);
 
-            return validationResult.Value!.ValidEntities.ToList();
+            return result.ValidEntities.ToList();
         }
         catch (Exception ex)
         {
@@ -36,9 +36,9 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
         {
             var validationResult = await CsvFileReader.ReadAndValidateCsv(filePath, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
 
-            LogResult(validationResult);
+            var result = ProcessValidationResult(validationResult);
 
-            return validationResult.Value!.ValidEntities.ToList();
+            return result.ValidEntities.ToList();
         }
         catch (Exception ex)
         {
@@ -47,22 +47,24 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
         }
     }
 
-    private void LogResult(Result<CsvValidationSummary<CustomWorkout>> results)
+    private CsvValidationSummary<CustomWorkout> ProcessValidationResult(Result<CsvValidationSummary<CustomWorkout>> results)
     {
+        if (results.Value is null)
+        {
+            throw new InvalidOperationException("No valid planning data found in the provided stream.");
+        }
+
         if (results.IsSuccess is false)
         {
             throw results.Exception!;
         }
-        _logger.LogInformation("Loaded {Count} workouts from planning file.", results.Value!.ValidCount);
+        _logger.LogInformation("Loaded {Count} workouts from planning file.", results.Value.ValidCount);
 
         if (results.Value.InvalidCount > 0)
         {
             _logger.LogWarning("Planning contains {InvalidCount} invalid workouts.", results.Value.InvalidCount);
         }
 
-        if (results.Value is null)
-        {
-            throw new InvalidOperationException("No valid planning data found in the provided stream.");
-        }
+        return results.Value;
     }
 }
