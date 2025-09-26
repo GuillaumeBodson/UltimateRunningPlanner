@@ -12,6 +12,7 @@
 @using WebUI.Models.Workouts
 @using WebUI.Services
 @using WebUI.Services.Interfaces
+@using static WebUI.Models.Planning.RemovalResult
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IAthleteSession AthleteSession
 @inject IDialogService Dialog
@@ -24,8 +25,9 @@
     <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Calendar</MudText>
 
     <CalendarComponent @bind-Planning="CalendarEvents" @bind-WeekRecaps="WeekRecaps" HasWeekRecap="true"
-                       OnPlanningSaveCallback="PlanningSave" 
-                       CreateEventAsync="CreateEventAsync"/>
+                       OnPlanningSaveCallback="PlanningSave"
+                       CreateEventAsync="CreateEventAsync"
+                       RemoveEventAsync="RemoveEventAsync" />
 
 </MudContainer>
 
@@ -81,7 +83,7 @@
                 Snackbar.Add("No planning loaded. Please build or load a planning first.", Severity.Error);
                 return null;
             }
-            
+
             int weekNumber;
             try
             {
@@ -140,18 +142,50 @@
     private async Task<CustomWorkoutModel?> OpenDialogAsync(DateOnly date)
     {
         // Open dialog to collect workout data
-        var parameters = new DialogParameters<EventEditDialog>
+        var parameters = new DialogParameters<WorkoutCreationDialog>
         {
-            [nameof(EventEditDialog.Date)] = date
+            [nameof(WorkoutCreationDialog.Date)] = date
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true };
-        var dialog = await Dialog.ShowAsync<EventEditDialog>("Create event", parameters, options);
+        var dialog = await Dialog.ShowAsync<WorkoutCreationDialog>("Create workout", parameters, options);
         var result = await dialog.Result;
 
         if (result is null || result.Canceled || result.Data is not CustomWorkoutModel model)
             return null;
 
         return model;
+    }
+    
+    private async Task RemoveEventAsync(int id)
+    {
+        if (_planning is null || CalendarEvents is null)
+        {
+            Snackbar.Add("No planning loaded. Cannot remove workout.", Severity.Error);
+            return;
+        }
+
+        var result = _planning.RemoveWorkoutById(id);
+
+        if (!result.Success)
+        {
+            var severity = result.FailureReason switch
+            {
+                RemovalFailureReason.PlanningNotLoaded => Severity.Warning,
+                RemovalFailureReason.WorkoutNotFound => Severity.Warning,
+                _ => Severity.Error
+            };
+
+            Snackbar.Add(result.ErrorMessage!, severity);
+            return;
+        }
+
+        // Persist updated planning
+        await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+        // Update UI state
+        CalendarEvents.Remove(CalendarEvents.First(e => e.Id == id));
+
+        Snackbar.Add("Workout removed successfully", Severity.Success);
+        StateHasChanged();
     }
 }
