@@ -65,9 +65,9 @@ public class Planning
 
             return RemovalResult.Succeeded();
         }
-        catch
+        catch (Exception ex)
         {
-            return RemovalResult.Failed("Storage operation failed", RemovalFailureReason.PersistenceError);
+            return RemovalResult.Failed($"Removal operation failed: {ex.Message}", RemovalFailureReason.UnexpectedError);
         }
     }
 
