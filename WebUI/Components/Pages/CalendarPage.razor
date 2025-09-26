@@ -61,7 +61,7 @@
 
     private async Task PlanningSave((DateOnly date, CalendarEvent ev) args)
     {
-        if (_planning is null || _planning.BaseWorkouts is null || _planning.Workouts is null)
+        if (_planning is null)
         {
             Snackbar.Add("No planning loaded. Cannot save workout changes.", Severity.Error);
             return;
