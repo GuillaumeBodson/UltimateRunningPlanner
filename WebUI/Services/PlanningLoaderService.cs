@@ -7,25 +7,20 @@ using WebUI.Validators;
 
 namespace WebUI.Services;
 
-public sealed class PlanningLoaderService : IPlanningLoaderService
+public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger) : IPlanningLoaderService
 {
-    private readonly ILogger<PlanningLoaderService> _logger;
-
-    public PlanningLoaderService(ILogger<PlanningLoaderService> logger)
-    {
-        _logger = logger;
-    }
+    private readonly ILogger<PlanningLoaderService> _logger = logger;
 
     public async Task<List<CustomWorkout>> LoadPlanningAsync(Stream fileStream)
     {
         _logger.LogInformation("Loading csv information from stream ");        
         try
         {
-            var planning = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
+            var validationResult = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
 
-            LogResult(planning);
+            var result = ProcessValidationResult(validationResult);
 
-            return planning.Value.ValidEntities.ToList();
+            return result.ValidEntities.ToList();
         }
         catch (Exception ex)
         {
@@ -39,11 +34,11 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
         _logger.LogInformation("Loading planning from CSV: {FilePath}", filePath);
         try
         {
-            var planning = await CsvFileReader.ReadAndValidateCsv(filePath, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
+            var validationResult = await CsvFileReader.ReadAndValidateCsv(filePath, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
 
-            LogResult(planning);
+            var result = ProcessValidationResult(validationResult);
 
-            return planning.Value.ValidEntities.ToList();
+            return result.ValidEntities.ToList();
         }
         catch (Exception ex)
         {
@@ -52,17 +47,24 @@ public sealed class PlanningLoaderService : IPlanningLoaderService
         }
     }
 
-    private void LogResult(Result<CsvValidationSummary<CustomWorkout>> results)
+    private CsvValidationSummary<CustomWorkout> ProcessValidationResult(Result<CsvValidationSummary<CustomWorkout>> results)
     {
+        if (results.Value is null)
+        {
+            throw new InvalidOperationException("No valid planning data found in the provided stream.");
+        }
+
         if (results.IsSuccess is false)
         {
             throw results.Exception!;
         }
-        _logger.LogInformation("Loaded {Count} workouts from planning file.", results.Value!.ValidCount);
+        _logger.LogInformation("Loaded {Count} workouts from planning file.", results.Value.ValidCount);
 
         if (results.Value.InvalidCount > 0)
         {
             _logger.LogWarning("Planning contains {InvalidCount} invalid workouts.", results.Value.InvalidCount);
         }
+
+        return results.Value;
     }
 }

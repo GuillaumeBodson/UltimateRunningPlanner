@@ -35,7 +35,6 @@
 @code {
     public ObservableCollection<CalendarEvent>? CalendarEvents { get; set; } = [];
     public ObservableCollection<WeekRecap> WeekRecaps { get; set; } = [];
-    private List<CustomWorkout>? _workouts;
     private Planning? _planning;
     private DateOnly _planningStartDate;
 
@@ -60,9 +59,14 @@
         StateHasChanged();
     }
 
-    private async void PlanningSave((DateOnly date, CalendarEvent ev) args)
+    private async Task PlanningSave((DateOnly date, CalendarEvent ev) args)
     {
-        var workout = _planning.BaseWorkouts!.FirstOrDefault(w => w.Id == args.ev.Id);
+        if (_planning is null)
+        {
+            Snackbar.Add("No planning loaded. Cannot save workout changes.", Severity.Error);
+            return;
+        }
+        var workout = _planning.BaseWorkouts.FirstOrDefault(w => w.Id == args.ev.Id);
         var weekNumber = _planning.GetWeekNumber(args.ev.Date);
         workout!.WeekNumber = weekNumber;
 
