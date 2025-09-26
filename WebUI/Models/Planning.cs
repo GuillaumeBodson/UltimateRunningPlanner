@@ -1,5 +1,4 @@
 ﻿using GarminRunerz.Workout.Services.Models;
-using Microsoft.Extensions.Logging;
 using System.MudPlanner;
 using System.Text.Json.Serialization;
 using Toolbox.Utilities;
@@ -10,9 +9,9 @@ namespace WebUI.Models;
 
 public class Planning
 {
-    public DateOnly StartDate { get; set; }
+    public required DateOnly StartDate { get; set; }
     public List<PlannedWorkout> Workouts { get; set; } = [];
-    public List<CustomWorkout> BaseWorkouts { get; set; } = [];
+    public required List<CustomWorkout> BaseWorkouts { get; set; } = [];
 
     public TrainingTemplateCollection Template { get; set; } = [];
 
@@ -34,7 +33,7 @@ public class Planning
             };
         }).ToList();
 
-    public Athlete Athlete { get; set; }
+    public required Athlete Athlete { get; set; }
 
     public int GetWeekNumber(DateOnly date)
     {

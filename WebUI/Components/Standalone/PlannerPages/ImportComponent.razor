@@ -77,15 +77,23 @@
         _lastImportSummary = null;
         try
         {
+            if(_startDateTime is null)
+            {
+                Snackbar.Add("Please select a start date before importing.", Severity.Warning);
+                _isLoading = false;
+                return;
+            }
             var file = e.File;
             using var stream = file.OpenReadStream();
 
-            var workouts = await PlanningLoaderService.LoadPlanningAsync(stream);
-            var count = workouts?.Count ?? 0;
+            var workouts = await PlanningLoaderService.LoadPlanningAsync(stream)
+                ?? throw new InvalidOperationException("No workouts found in the imported file.");
+            
+                var count = workouts.Count;
 
             if (count > 0 && WorkoutLoaded.HasDelegate)
             {
-                await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts));
+                await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts!));
             }
 
             _lastImportSummary = $"Imported {count} workouts from “{file.Name}”.";
