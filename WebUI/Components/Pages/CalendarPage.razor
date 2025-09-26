@@ -140,13 +140,13 @@
     private async Task<CustomWorkoutModel?> OpenDialogAsync(DateOnly date)
     {
         // Open dialog to collect workout data
-        var parameters = new DialogParameters<EventEditDialog>
+        var parameters = new DialogParameters<WorkoutCreationDialog>
         {
-            [nameof(EventEditDialog.Date)] = date
+            [nameof(WorkoutCreationDialog.Date)] = date
         };
 
         var options = new DialogOptions { CloseButton = true, FullWidth = true };
-        var dialog = await Dialog.ShowAsync<EventEditDialog>("Create event", parameters, options);
+        var dialog = await Dialog.ShowAsync<WorkoutCreationDialog>("Create workout", parameters, options);
         var result = await dialog.Result;
 
         if (result is null || result.Canceled || result.Data is not CustomWorkoutModel model)
