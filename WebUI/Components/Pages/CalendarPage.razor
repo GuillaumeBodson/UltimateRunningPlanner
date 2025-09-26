@@ -12,6 +12,7 @@
 @using WebUI.Models.Workouts
 @using WebUI.Services
 @using WebUI.Services.Interfaces
+@using static WebUI.Models.Planning.RemovalResult
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IAthleteSession AthleteSession
 @inject IDialogService Dialog
@@ -155,24 +156,36 @@
 
         return model;
     }
+    
     private async Task RemoveEventAsync(int id)
     {
-        if (_planning is null || CalendarEvents is null) return;
-
-        var workoutToRemove = _planning.BaseWorkouts.FirstOrDefault(w => w.Id == id);
-        var plannedWorkoutToRemove = _planning.Workouts.FirstOrDefault(w => w.Id == id);
-        var calendarEventToRemove = CalendarEvents.FirstOrDefault(e => e.Id == id);
-
-        if (workoutToRemove is null || plannedWorkoutToRemove is null || calendarEventToRemove is null)
+        if (_planning is null || CalendarEvents is null)
         {
-            Snackbar.Add($"workout with id:{id} not found for removal.", Severity.Error);
+            Snackbar.Add("No planning loaded. Cannot remove workout.", Severity.Error);
             return;
         }
 
-        _planning.BaseWorkouts.Remove(workoutToRemove);
-        _planning.Workouts.Remove(plannedWorkoutToRemove);
-        CalendarEvents.Remove(calendarEventToRemove);
+        var result = _planning.RemoveWorkoutById(id);
 
+        if (!result.Success)
+        {
+            var severity = result.FailureReason switch
+            {
+                RemovalFailureReason.PlanningNotLoaded => Severity.Warning,
+                RemovalFailureReason.WorkoutNotFound => Severity.Warning,
+                _ => Severity.Error
+            };
+
+            Snackbar.Add(result.ErrorMessage!, severity);
+            return;
+        }
+
+        // Persist updated planning
         await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+        // Update UI state
+        CalendarEvents.Remove(CalendarEvents.First(e => e.Id == id));
+
+        Snackbar.Add("Workout removed successfully", Severity.Success);
+        StateHasChanged();
     }
 }

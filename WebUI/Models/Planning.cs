@@ -1,8 +1,11 @@
 ﻿using GarminRunerz.Workout.Services.Models;
+using Microsoft.Extensions.Logging;
+using MudBlazor;
 using System.MudPlanner;
 using System.Text.Json.Serialization;
 using Toolbox.Utilities;
 using WebUI.Models.Workouts;
+using static WebUI.Models.Planning.RemovalResult;
 
 namespace WebUI.Models;
 
@@ -47,5 +50,44 @@ public class Planning
         int daysDifference = date.DayNumber - StartDate.DayNumber;
         return (daysDifference / 7) + 1;
     }
-        
+
+    public RemovalResult RemoveWorkoutById(int id)
+    {
+        try
+        {
+            var baseWorkout = BaseWorkouts.FirstOrDefault(w => w.Id == id);
+            var plannedWorkout = Workouts.FirstOrDefault(w => w.Id == id);
+
+            if (baseWorkout is null || plannedWorkout is null)
+                return RemovalResult.Failed($"Workout {id} not found", RemovalFailureReason.WorkoutNotFound);
+
+            BaseWorkouts.Remove(baseWorkout);
+            Workouts.Remove(plannedWorkout);
+
+            return RemovalResult.Succeeded();
+        }
+        catch
+        {
+            return RemovalResult.Failed("Storage operation failed", RemovalFailureReason.PersistenceError);
+        }
+    }
+
+    public sealed record RemovalResult
+    {
+        public bool Success { get; init; }
+        public string? ErrorMessage { get; init; }
+        public RemovalFailureReason? FailureReason { get; init; }
+
+        public static RemovalResult Succeeded() => new() { Success = true };
+        public static RemovalResult Failed(string message, RemovalFailureReason reason) =>
+            new() { Success = false, ErrorMessage = message, FailureReason = reason };
+
+        public enum RemovalFailureReason
+        {
+            PlanningNotLoaded,
+            WorkoutNotFound,
+            PersistenceError,
+            UnexpectedError
+        }
+    }
 }
