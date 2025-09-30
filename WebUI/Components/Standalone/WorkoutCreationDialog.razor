@@ -11,12 +11,12 @@
         <MudForm @ref="_form">
             <MudText Typo="Typo.h6" Class="mb-2">New event for @Date.ToString("D")</MudText>
 
-            <MudNumericField @bind-Value="_model.Repetitions" Label="Repetitions" Required="true" Disabled="_isRepetitionDisable" />
-            <MudNumericField @bind-Value="_model.RunDuration" Label="Effort duration (s)" Required="true" Disabled="_isRepetitionDisable" />
-            <MudNumericField @bind-Value="_model.CoolDownDuration" Label="Cool down duration (s)" Required="true" Disabled="_isRepetitionDisable" />
-            <MudNumericField @bind-Value="_model.TotalDuration" Label="Total duration (s)" Required="true"  />
+            <MudNumericField @bind-Value="Model.Repetitions" Label="Repetitions" Required="true" Disabled="_isRepetitionDisable" />
+            <MudNumericField @bind-Value="Model.RunDuration" Label="Effort duration (s)" Required="true" Disabled="_isRepetitionDisable" />
+            <MudNumericField @bind-Value="Model.CoolDownDuration" Label="Cool down duration (s)" Required="true" Disabled="_isRepetitionDisable" />
+            <MudNumericField @bind-Value="Model.TotalDuration" Label="Total duration (s)" Required="true"  />
 
-            <MudTextField @bind-Value="_model.Description" Label="Description" Lines="3" />
+            <MudTextField @bind-Value="Model.Description" Label="Description" Lines="3" />
 
             <MudSelect T="RunType"  Label="Run Type" ValueChanged="OnRunTypeChanged" Required="true">
                 @foreach (var c in Enum.GetValues<RunType>())
@@ -37,7 +37,7 @@
     [Parameter] public DateOnly Date { get; set; }
 
     private MudForm? _form;
-    private readonly CustomWorkoutModel _model = new() { RunType = RunType.Easy };
+    [Parameter] public CustomWorkoutModel Model { get; set; } = new() { RunType = RunType.Easy };
     private bool _isRepetitionDisable = true;
 
     private async Task Save()
@@ -45,19 +45,19 @@
         if (_form is null) return;
         await _form.Validate();
         if (_form.IsValid)
-            MudDialog.Close(DialogResult.Ok(_model));
+            MudDialog.Close(DialogResult.Ok(Model));
     }
 
     private void Cancel() => MudDialog.Cancel();
 
     private void OnRunTypeChanged(RunType args)
     {
-        _model.RunType = args;
+        Model.RunType = args;
         if ((args & (RunType.Easy | RunType.Race | RunType.Recovery)) !=0)
         {
-            _model.Repetitions = 0;
-            _model.RunDuration = 0;
-            _model.CoolDownDuration = 0;
+            Model.Repetitions = 0;
+            Model.RunDuration = 0;
+            Model.CoolDownDuration = 0;
             _isRepetitionDisable = true;
         }
         else

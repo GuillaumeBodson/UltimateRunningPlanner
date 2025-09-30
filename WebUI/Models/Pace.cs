@@ -61,6 +61,15 @@ namespace WebUI.Models
             return new Pace(secs);
         }
 
+        public static Pace FromMinutesDotSeconds(double time)
+        {
+            int minutes = (int)Math.Floor(time);
+            int seconds = (int)Math.Round((time - minutes) * 100);
+            seconds += minutes * 60;
+
+            return new Pace(checked((int)(minutes * 60) + seconds));
+        }
+
         public decimal ToMeterPerSeconds() => _totalSeconds == 0 ? 0m : 1000m / _totalSeconds;
 
         // Arithmetic (saturate subtraction at 0)
