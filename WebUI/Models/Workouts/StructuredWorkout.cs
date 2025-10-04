@@ -22,7 +22,7 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
     }
 
     /// <summary>
-    /// Duration (seconds) of each repetition's quality segment (currently double for backward compatibility).
+    /// Duration (seconds) of each repetition's quality segment
     /// </summary>
     public int IntervalDuration
     {
