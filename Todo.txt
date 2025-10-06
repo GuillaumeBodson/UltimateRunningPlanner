@@ -1,0 +1,6 @@
+- add persistance via sql db through ef accessible via API
+	- authentication
+- connect strava profile
+- update framework to .net10
+- add caching
+- edit calendar event
