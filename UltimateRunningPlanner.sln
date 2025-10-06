@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36414.22
+# Visual Studio Version 18
+VisualStudioVersion = 18.0.11018.127 d18.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUI", "WebUI\WebUI.csproj", "{EDF7EF25-569F-4313-AE6E-386DD3A6A662}"
 EndProject
@@ -9,6 +9,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Todo.txt = Todo.txt
 	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WorkoutPlanner.API", "WorkoutPlanner.API\WorkoutPlanner.API.csproj", "{C953885B-680D-4C51-8636-62F555B7D58E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,9 +24,16 @@ Global
 		{EDF7EF25-569F-4313-AE6E-386DD3A6A662}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EDF7EF25-569F-4313-AE6E-386DD3A6A662}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EDF7EF25-569F-4313-AE6E-386DD3A6A662}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C953885B-680D-4C51-8636-62F555B7D58E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C953885B-680D-4C51-8636-62F555B7D58E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C953885B-680D-4C51-8636-62F555B7D58E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C953885B-680D-4C51-8636-62F555B7D58E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C953885B-680D-4C51-8636-62F555B7D58E} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EA1B441A-79C1-4D32-964A-45689AA2380A}
