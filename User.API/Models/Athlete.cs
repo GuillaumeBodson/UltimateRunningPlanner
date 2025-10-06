@@ -10,4 +10,7 @@ public class Athlete
     public decimal SemiMarathonPace { get; set; }
     public decimal VmaPace { get; set; }
     public HashSet<Dictionary<DayOfWeek, RunType?>> TrainingTemplates { get; set; } = [];
+
+    public int UserId { get; set; }
+    public User User { get; set; } = null!;
 }
