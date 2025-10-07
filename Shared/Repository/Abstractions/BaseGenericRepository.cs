@@ -1,8 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Shared.Repository.Abstractions;
 
-namespace Shared.Repository;
+namespace Shared.Repository.Abstractions;
 
 public abstract class BaseGenericRepository<TEntity> where TEntity : class
 {

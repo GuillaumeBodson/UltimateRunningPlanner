@@ -1,9 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using User.API.Data;
+using Shared.Repository;
+using User.API.Repository;
+using User.API.Repository.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+
+builder.Services.AddLogging();
 
 // Configure EF Core to use SQL Server
 builder.Services.AddDbContext<UserDbContext>(options =>
@@ -11,12 +16,16 @@ builder.Services.AddDbContext<UserDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection"),
         sqlOptions => sqlOptions.EnableRetryOnFailure()
     ));
+builder.Services.AddScoped<DbContext>(provider => provider.GetRequiredService<UserDbContext>());
+
+builder.Services.AddGenericRepository();
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-builder.Services.AddLogging();
 
 var app = builder.Build();
 
