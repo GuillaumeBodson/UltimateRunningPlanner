@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11018.127 d18.0
+VisualStudioVersion = 18.0.11018.127
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebUI", "WebUI\WebUI.csproj", "{EDF7EF25-569F-4313-AE6E-386DD3A6A662}"
 EndProject
@@ -20,7 +20,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UserService", "UserService"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "User.API", "User.API\User.API.csproj", "{68D6BAE9-7A2B-4079-A6FC-7AFF9048DFFE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Shared", "Shared\Shared.csproj", "{6607E9F7-C288-4D33-9AEE-DAA3DB1FCEBE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolBox.EntityFramework", "..\Toolbox\ToolBox.API\ToolBox.EntityFramework.csproj", "{A1C3EEDD-DABB-4889-4BA0-0B0A2F8E4F2C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -40,10 +40,10 @@ Global
 		{68D6BAE9-7A2B-4079-A6FC-7AFF9048DFFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{68D6BAE9-7A2B-4079-A6FC-7AFF9048DFFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{68D6BAE9-7A2B-4079-A6FC-7AFF9048DFFE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6607E9F7-C288-4D33-9AEE-DAA3DB1FCEBE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6607E9F7-C288-4D33-9AEE-DAA3DB1FCEBE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6607E9F7-C288-4D33-9AEE-DAA3DB1FCEBE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6607E9F7-C288-4D33-9AEE-DAA3DB1FCEBE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1C3EEDD-DABB-4889-4BA0-0B0A2F8E4F2C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1C3EEDD-DABB-4889-4BA0-0B0A2F8E4F2C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1C3EEDD-DABB-4889-4BA0-0B0A2F8E4F2C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1C3EEDD-DABB-4889-4BA0-0B0A2F8E4F2C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,7 +53,7 @@ Global
 		{8DCE7D0E-75D6-4104-ADC4-D82E7EA2571D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{701ED4BE-EC80-42AB-9270-90D9CC9282FD} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 		{68D6BAE9-7A2B-4079-A6FC-7AFF9048DFFE} = {701ED4BE-EC80-42AB-9270-90D9CC9282FD}
-		{6607E9F7-C288-4D33-9AEE-DAA3DB1FCEBE} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{A1C3EEDD-DABB-4889-4BA0-0B0A2F8E4F2C} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {EA1B441A-79C1-4D32-964A-45689AA2380A}

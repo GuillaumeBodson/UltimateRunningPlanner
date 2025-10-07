@@ -1,4 +1,4 @@
-﻿using Shared.Repository.Abstractions;
+﻿using ToolBox.EntityFramework.Repository.Abstractions;
 
 namespace User.API.Repository.Abstractions;
 

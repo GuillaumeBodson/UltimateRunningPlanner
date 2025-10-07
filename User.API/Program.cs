@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using User.API.Data;
-using Shared.Repository;
 using User.API.Repository;
 using User.API.Repository.Abstractions;
+using ToolBox.EntityFramework.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
 

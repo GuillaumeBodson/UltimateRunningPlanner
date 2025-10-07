@@ -1,5 +1,5 @@
-﻿using Shared.Repository;
-using Shared.Repository.Abstractions;
+﻿using ToolBox.EntityFramework.Repository;
+using ToolBox.EntityFramework.Repository.Abstractions;
 using User.API.Repository.Abstractions;
 
 namespace User.API.BusinessLogic;

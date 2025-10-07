@@ -23,11 +23,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\Shared\Shared.csproj" />
+	  <Folder Include="BusinessLogic\Abstractions\" />
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="BusinessLogic\Abstractions\" />
+	  <ProjectReference Include="..\..\Toolbox\ToolBox.API\ToolBox.EntityFramework.csproj" />
 	</ItemGroup>
 
 </Project>
