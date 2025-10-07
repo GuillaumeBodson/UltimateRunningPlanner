@@ -1,6 +1,8 @@
-﻿namespace User.API.Models;
+﻿using Shared.Repository;
 
-public class User
+namespace User.API.Models;
+
+public class User : IDbEntity<int>
 {
     public int Id { get; set; }
     public Athlete Athlete { get; set; } = null!;

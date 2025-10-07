@@ -1,10 +1,8 @@
-﻿namespace User.API.Repository.Abstractions;
+﻿using Shared.Repository;
 
-public interface IUserRepository
+namespace User.API.Repository.Abstractions;
+
+public interface IUserRepository : IGenericRepository<Models.User, int>
 {
-    Task<IEnumerable<Models.User>> GetAllUsersAsync();
-    Task<Models.User?> GetUserByIdAsync(int id);
-    Task<Models.User> AddUserAsync(Models.User user);
-    Task UpdateUserAsync(Models.User user);
-    Task DeleteUserAsync(int id);
+
 }
