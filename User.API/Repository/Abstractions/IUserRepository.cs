@@ -1,4 +1,4 @@
-﻿using Shared.Repository;
+﻿using Shared.Repository.Abstractions;
 
 namespace User.API.Repository.Abstractions;
 

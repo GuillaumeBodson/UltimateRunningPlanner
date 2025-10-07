@@ -1,6 +1,6 @@
 ﻿using System.Linq.Expressions;
 
-namespace Shared.Repository;
+namespace Shared.Repository.Abstractions;
 
 public interface IIncludeSpecification<T> where T : class
 {
