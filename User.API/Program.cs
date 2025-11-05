@@ -3,6 +3,9 @@ using User.API.Data;
 using User.API.Repository;
 using User.API.Repository.Abstractions;
 using ToolBox.EntityFramework.Repository;
+using User.API.BusinessLogic.Abstractions;
+using User.API.BusinessLogic;
+using User.API.Mappers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,10 @@ builder.Services.AddScoped<DbContext>(provider => provider.GetRequiredService<Us
 builder.Services.AddGenericRepository();
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+
+builder.Services.AddScoped<IUserService, UserService>();
+
+builder.Services.AddScoped<IModelDtoMapper, Mapper>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi

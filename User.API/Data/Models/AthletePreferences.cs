@@ -1,4 +1,4 @@
-﻿namespace User.API.Models;
+﻿namespace User.API.Data.Models;
 
 public class AthletePreferences
 {

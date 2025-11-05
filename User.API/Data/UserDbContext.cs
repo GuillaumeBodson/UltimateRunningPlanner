@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using User.API.Models;
 using ToolBox.EntityFramework;
+using User.API.Data.Models;
 
 namespace User.API.Data;
 

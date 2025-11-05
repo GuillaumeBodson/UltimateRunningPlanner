@@ -1,8 +1,8 @@
 ﻿using GarminRunerz.Workout.Services.Models;
 
-namespace User.API.Models;
+namespace User.API.Dtos;
 
-public class Athlete
+public class AthleteDto
 {
     public int Id { get; set; }
     public decimal EasyPace { get; set; }
@@ -10,7 +10,4 @@ public class Athlete
     public decimal SemiMarathonPace { get; set; }
     public decimal VmaPace { get; set; }
     public HashSet<Dictionary<DayOfWeek, RunType?>> TrainingTemplates { get; set; } = [];
-
-    public int UserId { get; set; }
-    public User User { get; set; } = null!;
 }

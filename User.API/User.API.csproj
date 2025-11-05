@@ -24,10 +24,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="BusinessLogic\Abstractions\" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <ProjectReference Include="..\..\Toolbox\ToolBox.API\ToolBox.EntityFramework.csproj" />
 	</ItemGroup>
 

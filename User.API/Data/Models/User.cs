@@ -1,6 +1,6 @@
 ﻿using ToolBox.EntityFramework.Repository.Abstractions;
 
-namespace User.API.Models;
+namespace User.API.Data.Models;
 
 public class User : IDbEntity<int>
 {

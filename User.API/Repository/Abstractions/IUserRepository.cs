@@ -2,7 +2,7 @@
 
 namespace User.API.Repository.Abstractions;
 
-public interface IUserRepository : IGenericRepository<Models.User, int>
+public interface IUserRepository : IGenericRepository<Data.Models.User, int>
 {
 
 }
