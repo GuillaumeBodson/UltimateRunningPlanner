@@ -15,7 +15,6 @@ public class Workout
     public int EstimatedTime { get; set; }
     public decimal Pace { get; set; }
     public string Name { get; set; } = string.Empty;
-    protected string EventLabel { get; set; } = string.Empty;
 
     public int PlanningId { get; set; }
     public Planning Planning { get; set; } = null!;

@@ -1,6 +1,6 @@
 ﻿namespace User.API.Dtos;
 
-public record UserDto
+public class UserDto
 {
     public int Id { get; set; }
     public AthleteDto Athlete { get; set; } = null!;

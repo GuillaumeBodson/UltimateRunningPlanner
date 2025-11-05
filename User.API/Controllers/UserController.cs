@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using User.API.BusinessLogic.Abstractions;
+using User.API.Dtos;
 
 namespace User.API.Controllers;
 
@@ -15,9 +16,9 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{userId}")]
-    [ProducesResponseType(typeof(Data.Models.User), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Data.Models.User>> GetUserById(int userId)
+    public async Task<ActionResult<UserDto>> GetUserById(int userId)
     {
         var user = await _userService.GetUserByIdAsync(userId);
         if (user is null)
