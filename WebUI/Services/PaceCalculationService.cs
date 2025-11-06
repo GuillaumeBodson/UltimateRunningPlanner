@@ -31,7 +31,8 @@ public class PaceCalculationService : IPaceCalculationService
             int distance = distances[i];
             if (performances.FirstOrDefault(p => p.DistanceMeters == distance) is Performance performance && performance is not null)
             {
-                paces[distance] = new Pace(performance.TimeSeconds);
+                var secondsPerKm = performance.TimeSeconds / ((double)performance.DistanceMeters / 1000);
+                paces[distance] = new Pace((int)Math.Round(secondsPerKm));
             }
             else
             {

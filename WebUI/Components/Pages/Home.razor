@@ -13,7 +13,8 @@
     <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
         <MudTabPanel Text="Performances">
             <AthletePerformancesComponent Performances="_athlete.Performances"
-                                          PerformancesChanged="OnPerformancesChanged" />
+                                          PerformancesChanged="OnPerformancesChanged" 
+                                          OnPaceFetched="OnPaceFetched"/>
         </MudTabPanel>
 
         <MudTabPanel Text="Paces">
@@ -115,6 +116,36 @@
         _athlete.Performances = new();
         _athleteCreation = new AthleteCreation();
         Snackbar.Add("Stored data cleared", Severity.Warning);
+        StateHasChanged();
+    }
+    private async Task OnPaceFetched(Dictionary<int, Pace> args)
+    {
+        foreach (var paceDistance in args)
+        {
+            switch (paceDistance.Key)
+            {
+                case 1_500:
+                    _athlete.VmaPace = paceDistance.Value;
+                    break;
+                case 5_000:
+                    _athlete.FiveKPace = paceDistance.Value;
+                    break;
+                case 10_000:
+                    _athlete.TenKPace = paceDistance.Value;
+                    break;
+                case 21_097:
+                    _athlete.SemiMarathonPace = paceDistance.Value;
+                    break;
+                case 42_195:
+                    _athlete.MarathonPace = paceDistance.Value;
+                    break;               
+                default:
+                    _athlete.EasyPace = paceDistance.Value;
+                    break;
+            }
+        }
+
+        await SaveAthleteAsync();
         StateHasChanged();
     }
 }

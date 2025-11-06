@@ -54,6 +54,7 @@
 @code {
     [Parameter] public List<Performance>? Performances { get; set; }
     [Parameter] public EventCallback<List<Performance>> PerformancesChanged { get; set; }
+    [Parameter] public EventCallback<Dictionary<int, Pace>> OnPaceFetched { get; set; }
 
     private readonly Row[] _rows =
     [
@@ -194,5 +195,6 @@
         await PerformancesChanged.InvokeAsync(list);
 
         var result = await _paceCalculationService.CalculatePacesForStandardDistancesAsync([.. list]);
+        await OnPaceFetched.InvokeAsync(result);
     }
 }
