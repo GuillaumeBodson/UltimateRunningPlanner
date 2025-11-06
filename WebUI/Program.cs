@@ -1,7 +1,6 @@
 using Blazored.LocalStorage;
 using GarminRunerz.Workout.Services;
 using MudBlazor.Services;
-using System.Text.Json.Serialization;
 using WebUI.Components;
 using WebUI.DI;
 using WebUI.Services;
@@ -28,6 +27,9 @@ builder.Services.AddScoped<IAthleteSession, AthleteSession>();
 builder.Services.AddPlannedWorkoutFactories();
 
 builder.Services.AddScoped<IPlanningBuilder, PlanningBuilder>();
+
+// Register typed client for PaceCalculator.API
+builder.Services.AddPaceCalculatorApi(builder.Configuration);
 
 var app = builder.Build();
 
