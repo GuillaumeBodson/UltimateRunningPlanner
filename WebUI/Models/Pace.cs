@@ -40,7 +40,7 @@ namespace WebUI.Models
 
         public static Pace FromMinutesSeconds(int minutes, int seconds)
         {
-            if (minutes < 0) throw new ArgumentOutOfRangeException(nameof(minutes));
+            ArgumentOutOfRangeException.ThrowIfNegative(minutes);
             if (seconds is < 0 or > 59) throw new ArgumentOutOfRangeException(nameof(seconds), "Seconds must be in [0, 59].");
             return new Pace(checked(minutes * 60 + seconds));
         }
@@ -65,9 +65,9 @@ namespace WebUI.Models
         {
             int minutes = (int)Math.Floor(time);
             int seconds = (int)Math.Round((time - minutes) * 100);
-            seconds += minutes * 60;
 
-            return new Pace(checked((int)(minutes * 60) + seconds));
+
+            return FromMinutesSeconds(minutes, seconds);
         }
 
         public decimal ToMeterPerSeconds() => _totalSeconds == 0 ? 0m : 1000m / _totalSeconds;
