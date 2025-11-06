@@ -19,10 +19,10 @@ public class AthleteCreation
     public Athlete ToAthlete()
         => new Athlete
         {
-            EasyPace = Pace.FromMinutesDotSeconds(EasyPace),
-            MarathonPace = Pace.FromMinutesDotSeconds(MarathonPace),
-            SemiMarathonPace = Pace.FromMinutesDotSeconds(SemiMarathonPace),
-            VmaPace = Pace.FromMinutesDotSeconds(VmaPace)
+            EasyPace = Pace.FromMinutesSeconds(EasyPace),
+            MarathonPace = Pace.FromMinutesSeconds(MarathonPace),
+            SemiMarathonPace = Pace.FromMinutesSeconds(SemiMarathonPace),
+            VmaPace = Pace.FromMinutesSeconds(VmaPace)
         };
 
     public AthleteCreation() { }
