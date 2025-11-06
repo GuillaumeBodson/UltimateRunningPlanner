@@ -6,6 +6,8 @@
 @using BlazorApp.Components
 @using BlazorLibraries.MudPlanner
 @using GarminRunerz.Workout.Services.Models
+@using System.Text.Json
+@using System.Text.Json.Serialization
 @using Toolbox.Utilities
 @using WebUI.Mappers
 @using WebUI.Models
@@ -19,6 +21,7 @@
 @inject IPlannedWorkoutFactory WorkoutCreator
 @inject ISnackbar Snackbar
 @inject ILogger<CalendarPage> Logger
+@inject IJSRuntime JS
 
 <PageTitle>Calendar</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
@@ -36,13 +39,11 @@
     public ObservableCollection<CalendarEvent>? CalendarEvents { get; set; } = [];
     public ObservableCollection<WeekRecap> WeekRecaps { get; set; } = [];
     private Planning? _planning;
-    private DateOnly _planningStartDate;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
-        _planningStartDate = await localStorage.GetItemAsync<DateOnly>(Constants.StartDateKey);
         _planning = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
 
         var athlete = await AthleteSession.GetAndSetAsync();

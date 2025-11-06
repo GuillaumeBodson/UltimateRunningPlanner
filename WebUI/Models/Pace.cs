@@ -69,6 +69,7 @@ namespace WebUI.Models
         }
 
         public decimal ToMeterPerSeconds() => _totalSeconds == 0 ? 0m : 1000m / _totalSeconds;
+        public double ToKmPerHour() => _totalSeconds == 0 ? 0d : 3600d / _totalSeconds;
 
         // Arithmetic (saturate subtraction at 0)
         public static Pace operator +(Pace left, Pace right) => new(checked(left._totalSeconds + right._totalSeconds));

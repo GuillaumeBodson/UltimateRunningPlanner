@@ -15,7 +15,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddBlazoredLocalStorage(c =>
 {
-    c.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    c.JsonSerializerOptions.WriteIndented = false;
 });
 builder.Services.AddMudServices();
 builder.Services.AddWorkoutServices();
