@@ -16,7 +16,9 @@ public static class ServiceRegistrationExtension
             var options = sp.GetRequiredService<IOptions<PaceCalculatorApiOptions>>().Value;
             if (string.IsNullOrWhiteSpace(options.BaseUrl))
                 throw new InvalidOperationException("PaceCalculatorApi:BaseUrl is not configured.");
-            http.BaseAddress = new Uri(options.BaseUrl, UriKind.Absolute);
+            if (!Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var baseUri))
+                throw new InvalidOperationException($"PaceCalculatorApi:BaseUrl '{options.BaseUrl}' is not a valid absolute URI.");
+            http.BaseAddress = baseUri;
         });
 
         return services;

@@ -43,14 +43,14 @@ app.Run();
 
 internal record Performance
 {
-    public double DistanceMeters { get; set; }
-    public double TimeSeconds { get; set; }
+    public double DistanceMeters { get; init; }
+    public double TimeSeconds { get; init; }
 
     public (double DistanceMeters, double TimeSeconds) ToTuple() => (DistanceMeters, TimeSeconds);
 }
 
 internal record EstimationRequest 
 { 
-    public double DistanceMeters { get; set; }
-    public List<Performance> Performances { get; set; } = [];
+    public double DistanceMeters { get; init; }
+    public List<Performance> Performances { get; init; } = [];
 }

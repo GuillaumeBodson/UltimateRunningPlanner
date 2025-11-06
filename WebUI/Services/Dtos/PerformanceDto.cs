@@ -1,7 +1,7 @@
 namespace WebUI.Services.Dtos;
 
-public class PerformanceDto
+public record PerformanceDto
 {
-    public double DistanceMeters { get; set; }
-    public double TimeSeconds { get; set; }
+    public double DistanceMeters { get; init; }
+    public double TimeSeconds { get; init; }
 }
