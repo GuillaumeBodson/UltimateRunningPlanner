@@ -1,0 +1,193 @@
+@using System.Globalization
+@using WebUI.Models
+@inherits ComponentBase
+
+<MudStack Spacing="2">
+    <MudText Typo="Typo.h5">Best Performances</MudText>
+    <MudTable Items="_rows" Dense="true" Hover="true" Elevation="0">
+        <HeaderContent>
+            <MudTh>Distance</MudTh>
+            <MudTh>Time</MudTh>
+            <MudTh>Elev. gain (m)</MudTh>
+            <MudTh></MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Distance">@context.Label</MudTd>
+            <MudTd DataLabel="Time">
+                <MudTextField @bind-Value="context.Time"
+                              Placeholder="@context.Placeholder"
+                              Immediate="true"
+                              OnBlur="@(async _ => await CommitAsync(context))"
+                              Adornment="Adornment.End"
+                              AdornmentIcon="@Icons.Material.Filled.Timer"
+                              Margin="Margin.Dense" />
+            </MudTd>
+            <MudTd DataLabel="Elev. gain (m)">
+                <MudNumericField T="int?" @bind-Value="context.ElevGain"
+                                 Min="0" Max="10000" Step="10"
+                                 Immediate="true"
+                                 OnBlur="@(async _ => await CommitAsync(context))"
+                                 Adornment="Adornment.End"
+                                 AdornmentIcon="@Icons.Material.Filled.Terrain"
+                                 Margin="Margin.Dense" />
+            </MudTd>
+            <MudTd>
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" Size="Size.Small"
+                           OnClick="@(() => Clear(context.DistanceMeters))">
+                    Clear
+                </MudButton>
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+    <MudText Typo="Typo.caption" Color="Color.Secondary">
+        Tip: use mm:ss (e.g. 20:15) or h:mm:ss (e.g. 1:32:45).
+    </MudText>
+
+    <MudButton Color="Color.Primary" Variant="Variant.Filled"
+               OnClick="FetchPaceAsync" StartIcon="@Icons.Material.Filled.Save">
+        Confirm Times
+    </MudButton>
+</MudStack>
+
+@code {
+    [Parameter] public List<Performance>? Performances { get; set; }
+    [Parameter] public EventCallback<List<Performance>> PerformancesChanged { get; set; }
+
+    private readonly Row[] _rows =
+    [
+        new("5K",     5_000,   "mm:ss"),
+        new("10K",   10_000,   "mm:ss"),
+        new("20K",   20_000,   "mm:ss"),
+        new("Half",  21_097, "h:mm:ss"),
+        new("Marathon", 42_195, "h:mm:ss"),
+    ];
+
+    protected override void OnParametersSet()
+    {
+        var source = Performances ??= new List<Performance>();
+
+        foreach (var row in _rows)
+        {
+            var p = FindByDistance(source, row.DistanceMeters);
+            row.Time = p is null ? string.Empty : FormatTime(p.TimeSeconds);
+            row.ElevGain = p?.ElevationGainMeters ?? 0;
+        }
+    }
+
+    private async Task CommitAsync(Row row)
+    {
+        var list = Performances ??= new List<Performance>();
+
+        if (string.IsNullOrWhiteSpace(row.Time))
+        {
+            // No time => treat as not provided; remove record entirely
+            RemoveDistance(list, row.DistanceMeters);
+            await PerformancesChanged.InvokeAsync(list);
+            return;
+        }
+
+        if (!TryParseTime(row.Time!, out var seconds))
+        {
+            // invalid -> keep current text but don't persist a bad value
+            return;
+        }
+
+        var elev = row.ElevGain.GetValueOrDefault(0);
+        if (elev < 0) elev = 0;
+
+        Upsert(list, row.DistanceMeters, seconds, elev);
+        await PerformancesChanged.InvokeAsync(list);
+    }
+
+    private void Clear(double distanceMeters)
+    {
+        var list = Performances ??= new List<Performance>();
+        RemoveDistance(list, distanceMeters);
+        var row = _rows.First(r => r.DistanceMeters == distanceMeters);
+        row.Time = string.Empty;
+        row.ElevGain = 0;
+        _ = PerformancesChanged.InvokeAsync(list);
+        StateHasChanged();
+    }
+
+    private static Performance? FindByDistance(IList<Performance> list, double distanceMeters)
+        => list.FirstOrDefault(p => Math.Abs(p.DistanceMeters - distanceMeters) < 0.5);
+
+    private static void RemoveDistance(IList<Performance> list, double distanceMeters)
+    {
+        var existing = FindByDistance(list, distanceMeters);
+        if (existing is not null) list.Remove(existing);
+    }
+
+    private static void Upsert(IList<Performance> list, double distanceMeters, int timeSeconds, int elevationGainMeters)
+    {
+        var existing = FindByDistance(list, distanceMeters);
+        if (existing is null)
+        {
+            list.Add(new Performance
+            {
+                DistanceMeters = distanceMeters,
+                TimeSeconds = timeSeconds,
+                ElevationGainMeters = elevationGainMeters
+            });
+        }
+        else
+        {
+            existing.TimeSeconds = timeSeconds;
+            existing.ElevationGainMeters = elevationGainMeters;
+        }
+    }
+
+    private static bool TryParseTime(string input, out int seconds)
+    {
+        seconds = 0;
+        var parts = input.Trim().Split(':', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        if (parts.Length is < 2 or > 3) return false;
+
+        bool TryInt(string s, out int v) => int.TryParse(s, NumberStyles.None, CultureInfo.InvariantCulture, out v);
+
+        if (parts.Length == 2)
+        {
+            if (!TryInt(parts[0], out var mm) || !TryInt(parts[1], out var ss)) return false;
+            if (mm < 0 || ss is < 0 or > 59) return false;
+            seconds = mm * 60 + ss;
+            return true;
+        }
+
+        // h:mm:ss
+        if (!TryInt(parts[0], out var hh) || !TryInt(parts[1], out var mm3) || !TryInt(parts[2], out var ss3)) return false;
+        if (hh < 0 || mm3 is < 0 or > 59 || ss3 is < 0 or > 59) return false;
+        seconds = hh * 3600 + mm3 * 60 + ss3;
+        return true;
+    }
+
+    private static string FormatTime(int totalSeconds)
+    {
+        if (totalSeconds < 3600)
+        {
+            var mm = totalSeconds / 60;
+            var ss = totalSeconds % 60;
+            return $"{mm:D2}:{ss:D2}";
+        }
+
+        var h = totalSeconds / 3600;
+        var rem = totalSeconds % 3600;
+        var m = rem / 60;
+        var s = rem % 60;
+        return $"{h}:{m:D2}:{s:D2}";
+    }
+
+    private sealed class Row(string label, double distanceMeters, string placeholder)
+    {
+        public string Label { get; } = label;
+        public double DistanceMeters { get; } = distanceMeters;
+        public string Placeholder { get; } = placeholder;
+        public string? Time { get; set; }
+        public int? ElevGain { get; set; } = 0;
+    }
+    private async Task FetchPaceAsync(MouseEventArgs args)
+    {
+        var list = Performances ??= new List<Performance>();
+        await PerformancesChanged.InvokeAsync(list);
+    }
+}

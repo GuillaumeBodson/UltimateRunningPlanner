@@ -7,6 +7,7 @@ public class Athlete
     public Pace SemiMarathonPace { get; set; }
     public Pace VmaPace { get; set; }
 
+    public List<Performance> Performances { get; set; } = [];
     public HashSet<TrainingTemplate> TrainingTemplates { get; set; } = [];
 }
 
