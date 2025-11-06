@@ -19,7 +19,7 @@ public class Planning
     {
         get
         {
-            if(_baseWorkouts.Count == 0 && Workouts.Count > 0)
+            if (_baseWorkouts.Count == 0 && Workouts.Count > 0)
             {
                 // Auto-populate base workouts from planned workouts if not set
                 _baseWorkouts = Workouts.ToCustomWorkouts();

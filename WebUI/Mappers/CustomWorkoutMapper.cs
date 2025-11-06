@@ -62,7 +62,7 @@ public static class CustomWorkoutMapper
             RunType = w.RunType,
             TotalDuration = w.TotalDuration,
             Description = w.Description,
-            // Map Pace as minutes-per-km decimal; Speed as m/s
+            // Map Pace as minutes-per-km decimal; Speed as km/h
             Pace = (decimal)w.Pace.ToMinutesDouble(),
             Speed = (decimal)w.Pace.ToKmPerHour(),
         };

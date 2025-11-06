@@ -6,8 +6,6 @@
 @using BlazorApp.Components
 @using BlazorLibraries.MudPlanner
 @using GarminRunerz.Workout.Services.Models
-@using System.Text.Json
-@using System.Text.Json.Serialization
 @using Toolbox.Utilities
 @using WebUI.Mappers
 @using WebUI.Models
@@ -21,7 +19,6 @@
 @inject IPlannedWorkoutFactory WorkoutCreator
 @inject ISnackbar Snackbar
 @inject ILogger<CalendarPage> Logger
-@inject IJSRuntime JS
 
 <PageTitle>Calendar</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
