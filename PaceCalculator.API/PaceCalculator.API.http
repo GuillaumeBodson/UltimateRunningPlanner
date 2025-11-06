@@ -1,0 +1,19 @@
+@PaceCalculator.API_HostAddress = http://localhost:5156
+
+GET {{PaceCalculator.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
+POST {{PaceCalculator.API_HostAddress}}/estimate
+Accept: application/json
+Content-Type: application/json
+{
+  "DistanceMeters":2000,
+  "Performances":
+[
+  { "distanceMeters": 5000, "timeSeconds": 1500 },
+  { "distanceMeters": 10000, "timeSeconds": 3100 }
+]
+}
+
+###
