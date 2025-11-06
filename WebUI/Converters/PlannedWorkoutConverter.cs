@@ -9,15 +9,16 @@ public sealed class PlannedWorkoutJsonConverter : JsonConverter<PlannedWorkout>
 {
     public override PlannedWorkout? Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
+        var jsonOptions = new JsonSerializerOptions(options);
+        jsonOptions.Converters.Add(new JsonStringEnumConverter());
         using var doc = JsonDocument.ParseValue(ref reader);
         var root = doc.RootElement;
 
         if (!root.TryGetProperty("RunType", out var runTypeProp))
             throw new JsonException("Missing RunType discriminator.");
 
-        RunType runType = Enum.Parse<RunType>(runTypeProp.GetString()
-            ?? throw new JsonException("Missing RunType discriminator."));
-
+        var runType = runTypeProp.Deserialize<RunType>(jsonOptions);
+        
         Type concrete = runType switch
         {
             RunType.Easy or RunType.Recovery => typeof(EasyWorkout),
@@ -30,7 +31,8 @@ public sealed class PlannedWorkoutJsonConverter : JsonConverter<PlannedWorkout>
         };
 
         var json = root.GetRawText();
-        return (PlannedWorkout?)JsonSerializer.Deserialize(json, concrete, options);
+
+        return (PlannedWorkout?)JsonSerializer.Deserialize(json, concrete, jsonOptions);
     }
 
     public override void Write(Utf8JsonWriter writer, PlannedWorkout value, JsonSerializerOptions options)

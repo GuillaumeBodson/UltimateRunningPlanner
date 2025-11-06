@@ -2,6 +2,7 @@
 using System.MudPlanner;
 using System.Text.Json.Serialization;
 using Toolbox.Utilities;
+using WebUI.Mappers;
 using WebUI.Models.Workouts;
 using static WebUI.Models.Planning.RemovalResult;
 
@@ -9,10 +10,24 @@ namespace WebUI.Models;
 
 public class Planning
 {
+    private List<CustomWorkout> _baseWorkouts = [];
+
     public required DateOnly StartDate { get; set; }
     public List<PlannedWorkout> Workouts { get; set; } = [];
-    public required List<CustomWorkout> BaseWorkouts { get; set; } = [];
-
+    [JsonIgnore]
+    public List<CustomWorkout> BaseWorkouts
+    {
+        get
+        {
+            if (_baseWorkouts.Count == 0 && Workouts.Count > 0)
+            {
+                // Auto-populate base workouts from planned workouts if not set
+                _baseWorkouts = Workouts.ToCustomWorkouts();
+            }
+            return _baseWorkouts;
+        }
+        set => _baseWorkouts = value;
+    }
     public TrainingTemplateCollection Template { get; set; } = [];
 
     [JsonIgnore]

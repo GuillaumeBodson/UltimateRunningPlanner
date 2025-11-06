@@ -36,13 +36,11 @@
     public ObservableCollection<CalendarEvent>? CalendarEvents { get; set; } = [];
     public ObservableCollection<WeekRecap> WeekRecaps { get; set; } = [];
     private Planning? _planning;
-    private DateOnly _planningStartDate;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
-        _planningStartDate = await localStorage.GetItemAsync<DateOnly>(Constants.StartDateKey);
         _planning = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
 
         var athlete = await AthleteSession.GetAndSetAsync();
