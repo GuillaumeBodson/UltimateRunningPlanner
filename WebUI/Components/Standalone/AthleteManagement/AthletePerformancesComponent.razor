@@ -1,6 +1,8 @@
 @using System.Globalization
 @using WebUI.Models
+@using WebUI.Services.Interfaces
 @inherits ComponentBase
+@inject IPaceCalculationService _paceCalculationService
 
 <MudStack Spacing="2">
     <MudText Typo="Typo.h5">Best Performances</MudText>
@@ -55,6 +57,7 @@
 
     private readonly Row[] _rows =
     [
+        new("1500",     1_500,   "mm:ss"),
         new("5K",     5_000,   "mm:ss"),
         new("10K",   10_000,   "mm:ss"),
         new("20K",   20_000,   "mm:ss"),
@@ -126,7 +129,7 @@
         {
             list.Add(new Performance
             {
-                DistanceMeters = distanceMeters,
+                DistanceMeters = (int)Math.Round(distanceMeters),
                 TimeSeconds = timeSeconds,
                 ElevationGainMeters = elevationGainMeters
             });
@@ -189,5 +192,7 @@
     {
         var list = Performances ??= new List<Performance>();
         await PerformancesChanged.InvokeAsync(list);
+
+        var result = await _paceCalculationService.CalculatePacesForStandardDistancesAsync([.. list]);
     }
 }
