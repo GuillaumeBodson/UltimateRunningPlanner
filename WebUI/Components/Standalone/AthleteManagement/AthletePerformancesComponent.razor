@@ -103,7 +103,7 @@
         await PerformancesChanged.InvokeAsync(list);
     }
 
-    private void Clear(double distanceMeters)
+    private void Clear(int distanceMeters)
     {
         var list = Performances ??= new List<Performance>();
         RemoveDistance(list, distanceMeters);
@@ -114,23 +114,23 @@
         StateHasChanged();
     }
 
-    private static Performance? FindByDistance(IList<Performance> list, double distanceMeters)
+    private static Performance? FindByDistance(IList<Performance> list, int distanceMeters)
         => list.FirstOrDefault(p => Math.Abs(p.DistanceMeters - distanceMeters) < 0.5);
 
-    private static void RemoveDistance(IList<Performance> list, double distanceMeters)
+    private static void RemoveDistance(IList<Performance> list, int distanceMeters)
     {
         var existing = FindByDistance(list, distanceMeters);
         if (existing is not null) list.Remove(existing);
     }
 
-    private static void Upsert(IList<Performance> list, double distanceMeters, int timeSeconds, int elevationGainMeters)
+    private static void Upsert(IList<Performance> list, int distanceMeters, int timeSeconds, int elevationGainMeters)
     {
         var existing = FindByDistance(list, distanceMeters);
         if (existing is null)
         {
             list.Add(new Performance
             {
-                DistanceMeters = (int)Math.Round(distanceMeters),
+                DistanceMeters = distanceMeters,
                 TimeSeconds = timeSeconds,
                 ElevationGainMeters = elevationGainMeters
             });
@@ -181,10 +181,10 @@
         return $"{h}:{m:D2}:{s:D2}";
     }
 
-    private sealed class Row(string label, double distanceMeters, string placeholder)
+    private sealed class Row(string label, int distanceMeters, string placeholder)
     {
         public string Label { get; } = label;
-        public double DistanceMeters { get; } = distanceMeters;
+        public int DistanceMeters { get; } = distanceMeters;
         public string Placeholder { get; } = placeholder;
         public string? Time { get; set; }
         public int? ElevGain { get; set; } = 0;

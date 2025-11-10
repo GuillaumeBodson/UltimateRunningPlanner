@@ -24,12 +24,12 @@ public class PaceCalculationService : IPaceCalculationService
     {
         var paces = new Dictionary<int, Pace>();
         var missingDistances = distances.Where(d => !performances.Select(p => p.DistanceMeters).Contains(d)).ToList();
-        var apiCalls = new Task[missingDistances.Count];
+        var apiCalls = new Task<Pace>[missingDistances.Count];
         int j = 0;
         for (int i = 0; i < distances.Length; i++)
         {
             int distance = distances[i];
-            if (performances.FirstOrDefault(p => p.DistanceMeters == distance) is Performance performance && performance is not null)
+            if (performances.FirstOrDefault(p => Math.Abs(p.DistanceMeters - distance) < 500) is Performance performance)
             {
                 var secondsPerKm = performance.TimeSeconds / ((double)performance.DistanceMeters / 1000);
                 paces[distance] = new Pace((int)Math.Round(secondsPerKm));
@@ -41,12 +41,11 @@ public class PaceCalculationService : IPaceCalculationService
             }
         }
 
-        await Task.WhenAll(apiCalls);
+        var results = await Task.WhenAll(apiCalls);
         for (int i = 0; i < missingDistances.Count; i++)
         {
             int distance = missingDistances[i];
-            var pace = ((Task<Pace>)apiCalls[i]).Result;
-            paces[distance] = pace;
+            paces[distance] = results[i];
         }
         return paces;
     }
