@@ -34,7 +34,7 @@ public static class CustomWorkoutMapper
             RunType.Easy => athlete.EasyPace,
             RunType.LongRun => athlete.MarathonPace,
             RunType.Tempo => athlete.SemiMarathonPace,
-            RunType.Intervals => athlete.VmaPace,
+            RunType.Intervals => athlete.MasPace,
             RunType.Recovery => athlete.EasyPace,
             RunType.Steady => athlete.SemiMarathonPace,
             _ => athlete.EasyPace

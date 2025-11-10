@@ -7,7 +7,7 @@ public class Athlete
     public Pace SemiMarathonPace { get; set; }
     public Pace TenKPace { get; set; }
     public Pace FiveKPace { get; set; }
-    public Pace VmaPace { get; set; }
+    public Pace MasPace { get; set; }
 
     public List<Performance> Performances { get; set; } = [];
     public HashSet<TrainingTemplate> TrainingTemplates { get; set; } = [];
@@ -20,7 +20,7 @@ public class AthleteCreation
     public double SemiMarathonPace { get; set; }
     public double TenKPace { get; set; }
     public double FiveKPace { get; set; }
-    public double VmaPace { get; set; }
+    public double MasPace { get; set; }
     public Athlete ToAthlete()
         => new Athlete
         {
@@ -29,7 +29,7 @@ public class AthleteCreation
             SemiMarathonPace = Pace.FromMinutesSeconds(SemiMarathonPace),
             TenKPace = Pace.FromMinutesSeconds(TenKPace),
             FiveKPace = Pace.FromMinutesSeconds(FiveKPace),
-            VmaPace = Pace.FromMinutesSeconds(VmaPace)
+            MasPace = Pace.FromMinutesSeconds(MasPace)
         };
 
     public AthleteCreation() { }
@@ -40,6 +40,6 @@ public class AthleteCreation
         SemiMarathonPace = athlete.SemiMarathonPace.ToMinutesDotSeconds();
         TenKPace = athlete.TenKPace.ToMinutesDotSeconds();
         FiveKPace = athlete.FiveKPace.ToMinutesDotSeconds();
-        VmaPace = athlete.VmaPace.ToMinutesDotSeconds();
+        MasPace = athlete.MasPace.ToMinutesDotSeconds();
     }
 }

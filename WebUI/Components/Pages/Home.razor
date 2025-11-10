@@ -78,7 +78,7 @@
         _athlete.SemiMarathonPace = tempAthlete.SemiMarathonPace;
         _athlete.TenKPace = tempAthlete.TenKPace;
         _athlete.FiveKPace = tempAthlete.FiveKPace;
-        _athlete.VmaPace = tempAthlete.VmaPace;
+        _athlete.MasPace = tempAthlete.MasPace;
     }
 
     private void OnPerformancesChanged(List<Performance> updated)
@@ -134,7 +134,7 @@
             switch (paceDistance.Key)
             {
                 case 2_000:
-                    UpdatePace((a, p) => a.VmaPace = p, (ac, v) => ac.VmaPace = v, paceDistance.Value);
+                    UpdatePace((a, p) => a.MasPace = p, (ac, v) => ac.MasPace = v, paceDistance.Value);
                     break;
                 case 5_000:
                     UpdatePace((a, p) => a.FiveKPace = p, (ac, v) => ac.FiveKPace = v, paceDistance.Value);

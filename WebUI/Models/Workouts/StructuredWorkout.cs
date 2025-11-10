@@ -58,7 +58,7 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
         return RunType switch
         {
             Garmin.Models.RunType.Tempo => athlete.SemiMarathonPace.ToMeterPerSeconds(),
-            Garmin.Models.RunType.Intervals => athlete.VmaPace.ToMeterPerSeconds(),
+            Garmin.Models.RunType.Intervals => athlete.MasPace.ToMeterPerSeconds(),
             _ => Pace.ToMeterPerSeconds()
         };
     }

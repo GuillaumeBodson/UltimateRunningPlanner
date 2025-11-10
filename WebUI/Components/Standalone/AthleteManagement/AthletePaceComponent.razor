@@ -42,8 +42,8 @@
                                      Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
                 </MudItem>
                 <MudItem xs="12" md="6">
-                    <MudNumericField T="double" Label="VMA Pace"
-                                     Value="AthleteCreation.VmaPace" ValueChanged="OnVmaPaceChanged"
+                    <MudNumericField T="double" Label="MAS Pace"
+                                     Value="AthleteCreation.MasPace" ValueChanged="OnMasPaceChanged"
                                      Min="0" Step="0.01d" Format="0.00" Immediate="true"
                                      Validation="@_validator.Validation"
                                      Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
@@ -64,7 +64,7 @@
     private PaceValidator _validator = new();
 
     // Track previous values to detect +/- (delta ≈ ±0.01)
-    private double _prevEasy, _prevMarathon, _prevSemi, _prevTenK, _prevFiveK, _prevVma;
+    private double _prevEasy, _prevMarathon, _prevSemi, _prevTenK, _prevFiveK, _prevMas;
 
     protected override void OnParametersSet()
     {
@@ -73,7 +73,7 @@
         _prevSemi = AthleteCreation.SemiMarathonPace;
         _prevTenK = AthleteCreation.TenKPace;
         _prevFiveK = AthleteCreation.FiveKPace;
-        _prevVma = AthleteCreation.VmaPace;
+        _prevMas = AthleteCreation.MasPace;
     }
 
     private async Task OnEasyPaceChanged(double v)
@@ -111,10 +111,10 @@
         await AthleteCreationChanged.InvokeAsync(AthleteCreation);
     }
 
-    private async Task OnVmaPaceChanged(double v)
+    private async Task OnMasPaceChanged(double v)
     {
-        AthleteCreation.VmaPace = CoerceOnStepper(_prevVma, v);
-        _prevVma = AthleteCreation.VmaPace;
+        AthleteCreation.MasPace = CoerceOnStepper(_prevMas, v);
+        _prevMas = AthleteCreation.MasPace;
         await AthleteCreationChanged.InvokeAsync(AthleteCreation);
     }
 
