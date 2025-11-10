@@ -29,6 +29,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PaceCalculatorService", "Pa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaceCalculator.API", "PaceCalculator.API\PaceCalculator.API.csproj", "{46E9E249-A581-4E12-BF3B-FD7351873745}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolBox.File", "..\Toolbox\ToolBox.File\ToolBox.File.csproj", "{156D8834-7579-3E05-E503-2CA8F9CBED77}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -55,6 +57,10 @@ Global
 		{46E9E249-A581-4E12-BF3B-FD7351873745}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46E9E249-A581-4E12-BF3B-FD7351873745}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46E9E249-A581-4E12-BF3B-FD7351873745}.Release|Any CPU.Build.0 = Release|Any CPU
+		{156D8834-7579-3E05-E503-2CA8F9CBED77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{156D8834-7579-3E05-E503-2CA8F9CBED77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{156D8834-7579-3E05-E503-2CA8F9CBED77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{156D8834-7579-3E05-E503-2CA8F9CBED77}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

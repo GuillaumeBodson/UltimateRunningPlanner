@@ -15,7 +15,11 @@
 		<PackageReference Include="FluentValidation" Version="12.1.0" />
 		<PackageReference Include="GarminRunerz.Workout.Services" Version="1.0.2" />
 		<PackageReference Include="MudBlazor" Version="8.14.0" />
-		<PackageReference Include="ToolBox.File" Version="1.1.2" />
 		<PackageReference Include="Toolbox.Utilities" Version="1.0.1" />
+	</ItemGroup>
+
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\Toolbox\ToolBox.File\ToolBox.File.csproj" />
 	</ItemGroup>
 </Project>

@@ -86,6 +86,8 @@
             var file = e.File;
             using var stream = file.OpenReadStream();
 
+            var test = await PlanningLoaderService.LoadPlanningAsync2(stream);
+
             var workouts = await PlanningLoaderService.LoadPlanningAsync(stream)
                 ?? throw new InvalidOperationException("No workouts found in the imported file.");
             
