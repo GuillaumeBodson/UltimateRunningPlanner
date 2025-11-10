@@ -73,7 +73,8 @@
     }
     private void OnTrainingTemplatesChanged(List<TrainingTemplate> templates)
     {
-        _trainingTemplates = templates;
+        if (templates.Count != _trainingTemplates?.Count)
+            _trainingTemplates = templates;
     }
 
     private async Task BuildPlanningAsync(MouseEventArgs args)
