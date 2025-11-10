@@ -76,6 +76,8 @@
         _athlete.EasyPace = tempAthlete.EasyPace;
         _athlete.MarathonPace = tempAthlete.MarathonPace;
         _athlete.SemiMarathonPace = tempAthlete.SemiMarathonPace;
+        _athlete.TenKPace = tempAthlete.TenKPace;
+        _athlete.FiveKPace = tempAthlete.FiveKPace;
         _athlete.VmaPace = tempAthlete.VmaPace;
     }
 
@@ -83,6 +85,7 @@
     {
         // Keep as List<Performance> for storage
         _athlete.Performances = updated;
+
         StateHasChanged();
     }
 
@@ -118,34 +121,37 @@
         Snackbar.Add("Stored data cleared", Severity.Warning);
         StateHasChanged();
     }
-    private async Task OnPaceFetched(Dictionary<int, Pace> args)
+    private void UpdatePace(Action<Athlete, Pace> athleteSetter, Action<AthleteCreation, double> athleteCreationSetter, Pace pace)
+    {
+        athleteSetter(_athlete, pace);
+        athleteCreationSetter(_athleteCreation, pace.ToMinutesDotSeconds());
+    }
+
+    private void OnPaceFetched(Dictionary<int, Pace> args)
     {
         foreach (var paceDistance in args)
         {
             switch (paceDistance.Key)
             {
-                case 1_500:
-                    _athlete.VmaPace = paceDistance.Value;
+                case 2_000:
+                    UpdatePace((a, p) => a.VmaPace = p, (ac, v) => ac.VmaPace = v, paceDistance.Value);
                     break;
                 case 5_000:
-                    _athlete.FiveKPace = paceDistance.Value;
+                    UpdatePace((a, p) => a.FiveKPace = p, (ac, v) => ac.FiveKPace = v, paceDistance.Value);
                     break;
                 case 10_000:
-                    _athlete.TenKPace = paceDistance.Value;
+                    UpdatePace((a, p) => a.TenKPace = p, (ac, v) => ac.TenKPace = v, paceDistance.Value);
                     break;
                 case 21_097:
-                    _athlete.SemiMarathonPace = paceDistance.Value;
+                    UpdatePace((a, p) => a.SemiMarathonPace = p, (ac, v) => ac.SemiMarathonPace = v, paceDistance.Value);
                     break;
                 case 42_195:
-                    _athlete.MarathonPace = paceDistance.Value;
-                    break;               
+                    UpdatePace((a, p) => a.MarathonPace = p, (ac, v) => ac.MarathonPace = v, paceDistance.Value);
+                    break;
                 case 500_000:
-                    _athlete.EasyPace = paceDistance.Value;
+                    UpdatePace((a, p) => a.EasyPace = p, (ac, v) => ac.EasyPace = v, paceDistance.Value);
                     break;
             }
         }
-
-        await SaveAthleteAsync();
-        StateHasChanged();
     }
 }

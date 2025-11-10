@@ -28,6 +28,20 @@
                                      Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
                 </MudItem>
                 <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="10K Pace"
+                                     Value="AthleteCreation.TenKPace" ValueChanged="OnTenKPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudNumericField T="double" Label="5K Pace"
+                                     Value="AthleteCreation.FiveKPace" ValueChanged="OnFiveKPaceChanged"
+                                     Min="0" Step="0.01d" Format="0.00" Immediate="true"
+                                     Validation="@_validator.Validation"
+                                     Variant="Variant.Outlined" Adornment="Adornment.End" AdornmentText="min/km" />
+                </MudItem>
+                <MudItem xs="12" md="6">
                     <MudNumericField T="double" Label="VMA Pace"
                                      Value="AthleteCreation.VmaPace" ValueChanged="OnVmaPaceChanged"
                                      Min="0" Step="0.01d" Format="0.00" Immediate="true"
@@ -50,13 +64,15 @@
     private PaceValidator _validator = new();
 
     // Track previous values to detect +/- (delta ≈ ±0.01)
-    private double _prevEasy, _prevMarathon, _prevSemi, _prevVma;
+    private double _prevEasy, _prevMarathon, _prevSemi, _prevTenK, _prevFiveK, _prevVma;
 
     protected override void OnParametersSet()
     {
         _prevEasy = AthleteCreation.EasyPace;
         _prevMarathon = AthleteCreation.MarathonPace;
         _prevSemi = AthleteCreation.SemiMarathonPace;
+        _prevTenK = AthleteCreation.TenKPace;
+        _prevFiveK = AthleteCreation.FiveKPace;
         _prevVma = AthleteCreation.VmaPace;
     }
 
@@ -78,6 +94,20 @@
     {
         AthleteCreation.SemiMarathonPace = CoerceOnStepper(_prevSemi, v);
         _prevSemi = AthleteCreation.SemiMarathonPace;
+        await AthleteCreationChanged.InvokeAsync(AthleteCreation);
+    }
+
+    private async Task OnTenKPaceChanged(double v)
+    {
+        AthleteCreation.TenKPace = CoerceOnStepper(_prevTenK, v);
+        _prevTenK = AthleteCreation.TenKPace;
+        await AthleteCreationChanged.InvokeAsync(AthleteCreation);
+    }
+
+    private async Task OnFiveKPaceChanged(double v)
+    {
+        AthleteCreation.FiveKPace = CoerceOnStepper(_prevFiveK, v);
+        _prevFiveK = AthleteCreation.FiveKPace;
         await AthleteCreationChanged.InvokeAsync(AthleteCreation);
     }
 
