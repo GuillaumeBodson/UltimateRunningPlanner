@@ -11,10 +11,17 @@
     <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Athlete Management</MudText>
 
     <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-6">
+        <MudTabPanel Text="Performances">
+            <AthletePerformancesComponent Performances="_athlete.Performances"
+                                          PerformancesChanged="OnPerformancesChanged" 
+                                          OnPaceFetched="OnPaceFetched"/>
+        </MudTabPanel>
+
         <MudTabPanel Text="Paces">
             <AthletePaceComponent AthleteCreation="_athleteCreation"
                                   AthleteCreationChanged="OnAthleteCreationChanged" />
         </MudTabPanel>
+
         <MudTabPanel Text="Training Templates">
             <TemplateCreationComponent TrainingTemplates="_athlete.TrainingTemplates"
                                        TrainingTemplatesChanged="OnTrainingTemplatesChanged" />
@@ -50,7 +57,12 @@
             if (fromStorage is not null)
             {
                 _athlete = fromStorage;
+                _athlete.Performances ??= new();
                 _athleteCreation = new AthleteCreation(_athlete);
+            }
+            else
+            {
+                _athlete.Performances ??= new();
             }
             StateHasChanged();
         }
@@ -65,6 +77,13 @@
         _athlete.MarathonPace = tempAthlete.MarathonPace;
         _athlete.SemiMarathonPace = tempAthlete.SemiMarathonPace;
         _athlete.VmaPace = tempAthlete.VmaPace;
+    }
+
+    private void OnPerformancesChanged(List<Performance> updated)
+    {
+        // Keep as List<Performance> for storage
+        _athlete.Performances = updated;
+        StateHasChanged();
     }
 
     private void OnTrainingTemplatesChanged()
@@ -84,6 +103,7 @@
     {
         var fromStorage = await AthleteSession.GetAndSetAsync();
         _athlete = fromStorage ?? new Athlete();
+        _athlete.Performances ??= new();
         _athleteCreation = new AthleteCreation(_athlete);
         Snackbar.Add("Form reset", Severity.Info);
         StateHasChanged();
@@ -93,8 +113,39 @@
     {
         await AthleteSession.RemoveAsync();
         _athlete = new Athlete();
+        _athlete.Performances = new();
         _athleteCreation = new AthleteCreation();
         Snackbar.Add("Stored data cleared", Severity.Warning);
+        StateHasChanged();
+    }
+    private async Task OnPaceFetched(Dictionary<int, Pace> args)
+    {
+        foreach (var paceDistance in args)
+        {
+            switch (paceDistance.Key)
+            {
+                case 1_500:
+                    _athlete.VmaPace = paceDistance.Value;
+                    break;
+                case 5_000:
+                    _athlete.FiveKPace = paceDistance.Value;
+                    break;
+                case 10_000:
+                    _athlete.TenKPace = paceDistance.Value;
+                    break;
+                case 21_097:
+                    _athlete.SemiMarathonPace = paceDistance.Value;
+                    break;
+                case 42_195:
+                    _athlete.MarathonPace = paceDistance.Value;
+                    break;               
+                case 500_000:
+                    _athlete.EasyPace = paceDistance.Value;
+                    break;
+            }
+        }
+
+        await SaveAthleteAsync();
         StateHasChanged();
     }
 }

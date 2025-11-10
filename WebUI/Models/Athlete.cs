@@ -5,8 +5,11 @@ public class Athlete
     public Pace EasyPace { get; set; }
     public Pace MarathonPace { get; set; }
     public Pace SemiMarathonPace { get; set; }
+    public Pace TenKPace { get; set; }
+    public Pace FiveKPace { get; set; }
     public Pace VmaPace { get; set; }
 
+    public List<Performance> Performances { get; set; } = [];
     public HashSet<TrainingTemplate> TrainingTemplates { get; set; } = [];
 }
 
