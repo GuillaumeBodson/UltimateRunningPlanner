@@ -76,6 +76,8 @@
         _athlete.EasyPace = tempAthlete.EasyPace;
         _athlete.MarathonPace = tempAthlete.MarathonPace;
         _athlete.SemiMarathonPace = tempAthlete.SemiMarathonPace;
+        _athlete.TenKPace = tempAthlete.TenKPace;
+        _athlete.FiveKPace = tempAthlete.FiveKPace;
         _athlete.VmaPace = tempAthlete.VmaPace;
     }
 
@@ -83,6 +85,7 @@
     {
         // Keep as List<Performance> for storage
         _athlete.Performances = updated;
+
         StateHasChanged();
     }
 
@@ -124,28 +127,33 @@
         {
             switch (paceDistance.Key)
             {
-                case 1_500:
+                case 2_000:
                     _athlete.VmaPace = paceDistance.Value;
+                    _athleteCreation.VmaPace = paceDistance.Value.ToMinutesDotSeconds();
                     break;
                 case 5_000:
                     _athlete.FiveKPace = paceDistance.Value;
+                    _athleteCreation.FiveKPace = paceDistance.Value.ToMinutesDotSeconds();
                     break;
                 case 10_000:
                     _athlete.TenKPace = paceDistance.Value;
+                    _athleteCreation.TenKPace = paceDistance.Value.ToMinutesDotSeconds();
                     break;
                 case 21_097:
                     _athlete.SemiMarathonPace = paceDistance.Value;
+                    _athleteCreation.SemiMarathonPace = paceDistance.Value.ToMinutesDotSeconds();
                     break;
                 case 42_195:
                     _athlete.MarathonPace = paceDistance.Value;
+                    _athleteCreation.MarathonPace = paceDistance.Value.ToMinutesDotSeconds();
                     break;               
                 case 500_000:
                     _athlete.EasyPace = paceDistance.Value;
+                    _athleteCreation.EasyPace = paceDistance.Value.ToMinutesDotSeconds();
                     break;
             }
         }
 
-        await SaveAthleteAsync();
         StateHasChanged();
     }
 }

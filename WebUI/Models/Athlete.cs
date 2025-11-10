@@ -18,6 +18,8 @@ public class AthleteCreation
     public double EasyPace { get; set; }
     public double MarathonPace { get; set; }
     public double SemiMarathonPace { get; set; }
+    public double TenKPace { get; set; }
+    public double FiveKPace { get; set; }
     public double VmaPace { get; set; }
     public Athlete ToAthlete()
         => new Athlete
@@ -25,6 +27,8 @@ public class AthleteCreation
             EasyPace = Pace.FromMinutesSeconds(EasyPace),
             MarathonPace = Pace.FromMinutesSeconds(MarathonPace),
             SemiMarathonPace = Pace.FromMinutesSeconds(SemiMarathonPace),
+            TenKPace = Pace.FromMinutesSeconds(TenKPace),
+            FiveKPace = Pace.FromMinutesSeconds(FiveKPace),
             VmaPace = Pace.FromMinutesSeconds(VmaPace)
         };
 
@@ -34,6 +38,8 @@ public class AthleteCreation
         EasyPace = athlete.EasyPace.ToMinutesDotSeconds();
         MarathonPace = athlete.MarathonPace.ToMinutesDotSeconds();
         SemiMarathonPace = athlete.SemiMarathonPace.ToMinutesDotSeconds();
+        TenKPace = athlete.TenKPace.ToMinutesDotSeconds();
+        FiveKPace = athlete.FiveKPace.ToMinutesDotSeconds();
         VmaPace = athlete.VmaPace.ToMinutesDotSeconds();
     }
 }
