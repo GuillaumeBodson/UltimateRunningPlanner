@@ -1,6 +1,8 @@
 ﻿@page "/planner"
 @using GarminRunerz.Workout.Services.Models
+@using System.Text.Json
 @using WebUI.Components.Standalone.PlannerPages
+@using WebUI.Converters
 @using WebUI.Models
 @using WebUI.Services.Interfaces
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
@@ -82,7 +84,11 @@
         try
         {
             var planning = PlanningBuilder.BuildPlanning(_startDateTime!.Value, _workouts!, _athlete!, _trainingTemplates);
-            await localStorage.SetItemAsync(Constants.PlanningKey, planning);
+
+            planning.BaseWorkouts = [];
+
+            PlanningLoaderService.LoadPlanning(planning);
+
             Snackbar.Add("Planning saved successfully", Severity.Success);
         }
         catch (Exception)

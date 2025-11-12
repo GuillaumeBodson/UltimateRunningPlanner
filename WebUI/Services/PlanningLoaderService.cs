@@ -2,6 +2,7 @@ using GarminRunerz.Workout.Services.Models;
 using ToolBox.File;
 using ToolBox.File.Core;
 using WebUI.Mappers;
+using WebUI.Models;
 using WebUI.Services.Interfaces;
 using WebUI.Validators;
 
@@ -11,12 +12,14 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
 {
     private readonly ILogger<PlanningLoaderService> _logger = logger;
 
-    public async Task<List<CustomWorkout>> LoadPlanningAsync(Stream fileStream)
+    private Planning? _planning;
+
+    public async Task<List<CustomWorkout>> ReadCustomWorkoutsAsync(Stream fileStream)
     {
         _logger.LogInformation("Loading csv information from stream ");        
         try
         {
-            var validationResult = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
+            var validationResult = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator(), allowQuotedFields:true);
 
             var result = ProcessValidationResult(validationResult);
 
@@ -27,6 +30,22 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
             _logger.LogError(ex, "Failed to load planning from stream");
             throw;
         }
+    }
+
+    public void LoadPlanning(Planning planning)
+    {
+        _logger.LogInformation("Loading planning");
+        _planning = planning;
+    }
+
+    public Planning GetPlanning()
+    {
+        if (_planning is null)
+        {
+            throw new InvalidOperationException("Planning has not been loaded.");
+        }
+        _logger.LogInformation("Retrieving loaded planning");
+        return _planning;
     }
 
     public async Task<List<CustomWorkout>> LoadPlanningFromFileAsync(string filePath)

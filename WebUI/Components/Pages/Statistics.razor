@@ -154,6 +154,6 @@
         if (workout is not IStructuredWorkout structuredWorkout || structuredWorkout.IsEmpty)
             return 0d;
 
-        return structuredWorkout.Repetitions * structuredWorkout.IntervalDuration * (double)workout.Pace.ToMeterPerSeconds() / 1000d;
+        return structuredWorkout.GetEffortDistance() / 1000d;
     }
 }

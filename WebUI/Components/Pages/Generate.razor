@@ -7,10 +7,14 @@
 @using WebUI.Models
 @using MudBlazor
 @using Microsoft.JSInterop
+@using WebUI.Services
+@using WebUI.Services.Interfaces
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 @inject IWorkoutGeneratorService WorkoutGeneratorService
+@inject IPlanningLoaderService PlanningLoaderService
+@inject IWorkoutMetadataFactory WorkoutMetadataFactory
 
 <PageTitle>Generate</PageTitle>
 
@@ -30,19 +34,20 @@
 @code {
     private List<CustomWorkout>? Workouts { get; set; }
     private bool CanDownload => Workouts is { Count: > 0 };
+    private Planning? _planning;
+    private Athlete? Athlete => _planning?.Athlete;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
-        var fromStorage = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
-        if (fromStorage is not null)
+        _planning = PlanningLoaderService.GetPlanning();
+        if (_planning is not null)
         {
-            Workouts = fromStorage.BaseWorkouts
-                .Where(w => w.Repetitions > 0)
+            Workouts = _planning.BaseWorkouts
+                .Where(w => w.HasDetails)
                 .ToList();
         }
-        
 
         StateHasChanged();
     }
@@ -56,10 +61,15 @@
         {
             foreach (var workout in Workouts!)
             {
-                var entry = archive.CreateEntry($"w{workout.WeekNumber}-{workout.RunType}.json");
+                var plannedWorkout = _planning!.Workouts.FirstOrDefault(w => w.Id == workout.Id);                
+
+                var workoutPreferences = Athlete!.AthletePreferences.GetPreferencesForRunType(workout.RunType);
+
+                var entry = archive.CreateEntry($"w{plannedWorkout?.WeekNumber}-{workout.RunType}.json");
                 await using var entryStream = entry.Open();
 
-                Workout garminWorkout = WorkoutGeneratorService.GenerateWorkoutsFromPlanning(workout);
+                var metadata = WorkoutMetadataFactory.Create(plannedWorkout, _planning.Athlete, workoutPreferences);
+                Workout garminWorkout = WorkoutGeneratorService.GenerateWorkoutsFromPlanning(workout, metadata);
                 await JsonSerializer.SerializeAsync(entryStream, garminWorkout);
             }
         }

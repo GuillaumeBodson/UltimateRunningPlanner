@@ -9,10 +9,10 @@ public sealed class LongRunWorkout : StructuredWorkout
         get
         {
             double km = EstimatedDistance / 1000.0;
-            if (Repetitions == 0)
+            if (IsEmpty)
                 return $"W{WeekNumber} Long run ({km}km)";
 
-            return $"W{WeekNumber} Long run with {Repetitions}x{IntervalDuration}\" @ {FormatPace()}min/km ({km}km)";
+            return $"W{WeekNumber} Long run with {StringifyDetails()}";
         }
     }
 

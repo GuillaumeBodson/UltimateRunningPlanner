@@ -86,12 +86,12 @@
             var file = e.File;
             using var stream = file.OpenReadStream();
 
-            var workouts = await PlanningLoaderService.LoadPlanningAsync(stream)
+            var workouts = await PlanningLoaderService.ReadCustomWorkoutsAsync(stream)
                 ?? throw new InvalidOperationException("No workouts found in the imported file.");
-            
+
             var count = workouts.Count;
 
-            if (count > 0 && WorkoutLoaded.HasDelegate)
+            if (workouts.Count > 0 && WorkoutLoaded.HasDelegate)
             {
                 await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts));
             }
