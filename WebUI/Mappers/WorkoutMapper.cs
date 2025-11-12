@@ -1,12 +1,13 @@
 ﻿using GarminRunerz.Workout.Services.Models;
 using WebUI.Models;
 using WebUI.Models.Workouts;
+using WebUI.Services.Dtos;
 
 namespace WebUI.Mappers;
 
-public static class CustomWorkoutMapper
+public static class WorkoutMapper
 {
-    public static CustomWorkout ToCustomWorkout(this CustomWorkoutModel model, int weekNumber, Athlete athlete, int id)
+    public static WorkoutDto ToWorkoutDto(this CustomWorkoutModel model, int weekNumber, Athlete athlete, int id)
     {
         var pace = model.RunType switch
         {
@@ -19,7 +20,7 @@ public static class CustomWorkoutMapper
             _ => athlete.EasyPace
         };
 
-        var details = model.Repetitions > 0 ? new CustomWorkoutDetails
+        var details = model.Repetitions > 0 ? new WorkoutDetailsDto
         {
             Repetitions = model.Repetitions,
             EffortDuration = (int)model.RunDuration,
@@ -36,7 +37,7 @@ public static class CustomWorkoutMapper
                 _ => PaceType.EasyPace
             }
         } : null;
-        return new CustomWorkout
+        return new WorkoutDto
         {
             WeekNumber = weekNumber,
             RunType = model.RunType,
@@ -84,14 +85,14 @@ public static class CustomWorkoutMapper
     public static List<CustomWorkout> ToCustomWorkouts(this IEnumerable<PlannedWorkout> workouts)
         => workouts.Select(ToCustomWorkout).ToList();
 
-    public static CustomWorkout FromCsvLine(string[] line)
+    public static WorkoutDto FromCsvLine(string[] line)
     {
         // a) n * (t, p, r)
-        CustomWorkoutDetails ExtractSimpleDetails(string detailsString)
+        WorkoutDetailsDto ExtractSimpleDetails(string detailsString)
         {
             var repetitionString = detailsString.Split(" * ");
             var durationString = repetitionString[1].TrimStart('(').Split(", ");
-            return new CustomWorkoutDetails
+            return new WorkoutDetailsDto
             {
                 Repetitions = int.Parse(repetitionString[0].Trim()),
                 EffortDuration = int.Parse(durationString[0]),
@@ -100,8 +101,9 @@ public static class CustomWorkoutMapper
             };
         }
 
-        CustomWorkout garminWorkout = new CustomWorkout
+        WorkoutDto garminWorkout = new WorkoutDto
         {
+            WeekNumber = int.Parse(line[0]),
             RunType = Enum.Parse<RunType>(line[1], true),
             TotalDuration = int.Parse(line[2]),
             Description = line[4],
@@ -118,7 +120,7 @@ public static class CustomWorkoutMapper
         {
             throw new ArgumentException($"Invalid CSV line. Expected 5 fields but got {line.Length}.");
         }
-        CustomWorkoutDetails? details = null;
+        WorkoutDetailsDto? details = null;
         if (!string.IsNullOrWhiteSpace(line[3]))
         {
             var detailsString = line[3];
@@ -135,7 +137,7 @@ public static class CustomWorkoutMapper
                 var repetitionString = detailsSplit[0].Split(" * ");
 
                 var innerDurationString = repetitionString[2].Split(", ");
-                var garminDetailsInner = new CustomWorkoutDetails
+                var garminDetailsInner = new WorkoutDetailsDto
                 {
                     Repetitions = int.Parse(repetitionString[1].TrimStart('(').Trim()),
                     EffortDuration = int.Parse(innerDurationString[0].TrimStart('(')),
@@ -143,7 +145,7 @@ public static class CustomWorkoutMapper
                     RecoveryDuration = int.Parse(innerDurationString[2])
                 };
 
-                details = new CustomWorkoutDetails
+                details = new WorkoutDetailsDto
                 {
                     Repetitions = int.Parse(repetitionString[0].Trim()),
                     Details = garminDetailsInner,
@@ -166,7 +168,7 @@ public static class CustomWorkoutMapper
         return garminWorkout;
     }
 
-    public static List<WorkoutDetails> ToWorkoutDetails(this IEnumerable<CustomWorkoutDetails> detailsCollection, Athlete athlete)
+    public static List<WorkoutDetails> ToWorkoutDetails(this IEnumerable<WorkoutDetailsDto> detailsCollection, Athlete athlete)
     {
         List<WorkoutDetails> result = [];
         foreach (var detail in detailsCollection)

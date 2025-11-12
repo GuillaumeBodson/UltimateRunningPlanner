@@ -24,7 +24,7 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
     public List<WorkoutDetails>? DetailsCollection { get; set; } = null;
 
 
-    public bool IsEmpty => (Details?.Repetitions ?? DetailsCollection?.Count) <= 0;
+    public bool IsEmpty => !((Details?.Repetitions ?? DetailsCollection?.Count) > 0);
 
     public TimeSpan WarmUp { get; set; }
 
