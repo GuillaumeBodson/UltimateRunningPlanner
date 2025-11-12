@@ -1,11 +1,11 @@
 ﻿using FluentValidation;
-using GarminRunerz.Workout.Services.Models;
+using WebUI.Services.Dtos;
 
 namespace WebUI.Validators
 {
-    public class CustomWorkoutValidator : AbstractValidator<CustomWorkout>
+    public class WorkoutDtoValidator : AbstractValidator<WorkoutDto>
     {
-        public CustomWorkoutValidator()
+        public WorkoutDtoValidator()
         {
             //RuleFor(x => x.WeekNumber).GreaterThan(0).WithMessage("Week number must be greater than 0.");
             RuleFor(x => x.RunType).IsInEnum().WithMessage("Run type is not valid.");

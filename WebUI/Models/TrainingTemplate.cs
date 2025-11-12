@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.Text.Json.Serialization;
 using WebUI.Converters;
+using WebUI.Services.Dtos;
 
 namespace WebUI.Models;
 
@@ -86,12 +87,12 @@ public sealed class TrainingTemplate : IEquatable<TrainingTemplate>
     /// 3. Any remaining unused day
     /// LongRun / quality workouts prioritized via Priority().
     /// </summary>
-    public IEnumerable<(CustomWorkout workout, DayOfWeek day)> ScheduleWeek(IEnumerable<CustomWorkout> workouts)
+    public IEnumerable<(WorkoutDto workout, DayOfWeek day)> ScheduleWeek(IEnumerable<WorkoutDto> workouts)
     {
         ArgumentNullException.ThrowIfNull(workouts);
         var ordered = workouts.OrderBy(w => Priority(w.RunType)).ToList();
         var used = new HashSet<DayOfWeek>();
-        var result = new List<(CustomWorkout, DayOfWeek)>();
+        var result = new List<(WorkoutDto, DayOfWeek)>();
 
         foreach (var w in ordered)
         {

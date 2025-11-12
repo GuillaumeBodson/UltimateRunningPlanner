@@ -10,24 +10,8 @@ namespace WebUI.Models;
 
 public class Planning
 {
-    private List<CustomWorkout> _baseWorkouts = [];
-
     public required DateOnly StartDate { get; set; }
-    public List<PlannedWorkout> Workouts { get; set; } = [];
-    [JsonIgnore]
-    public List<CustomWorkout> BaseWorkouts
-    {
-        get
-        {
-            if (_baseWorkouts.Count == 0 && Workouts.Count > 0)
-            {
-                // Auto-populate base workouts from planned workouts if not set
-                _baseWorkouts = Workouts.ToCustomWorkouts();
-            }
-            return _baseWorkouts;
-        }
-        set => _baseWorkouts = value;
-    }
+    public List<PlannedWorkout> Workouts { get; set; } = []; 
     public TrainingTemplateCollection Template { get; set; } = [];
 
     [JsonIgnore]
@@ -68,13 +52,11 @@ public class Planning
     {
         try
         {
-            var baseWorkout = BaseWorkouts.FirstOrDefault(w => w.Id == id);
             var plannedWorkout = Workouts.FirstOrDefault(w => w.Id == id);
 
-            if (baseWorkout is null || plannedWorkout is null)
+            if (plannedWorkout is null)
                 return RemovalResult.Failed($"Workout {id} not found", RemovalFailureReason.WorkoutNotFound);
 
-            BaseWorkouts.Remove(baseWorkout);
             Workouts.Remove(plannedWorkout);
 
             return RemovalResult.Succeeded();

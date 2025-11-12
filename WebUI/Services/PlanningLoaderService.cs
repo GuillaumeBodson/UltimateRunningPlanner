@@ -3,6 +3,7 @@ using ToolBox.File;
 using ToolBox.File.Core;
 using WebUI.Mappers;
 using WebUI.Models;
+using WebUI.Services.Dtos;
 using WebUI.Services.Interfaces;
 using WebUI.Validators;
 
@@ -14,12 +15,12 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
 
     private Planning? _planning;
 
-    public async Task<List<CustomWorkout>> ReadCustomWorkoutsAsync(Stream fileStream)
+    public async Task<List<WorkoutDto>> ReadCustomWorkoutsAsync(Stream fileStream)
     {
         _logger.LogInformation("Loading csv information from stream ");        
         try
         {
-            var validationResult = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator(), allowQuotedFields:true);
+            var validationResult = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, WorkoutMapper.FromCsvLine, new WorkoutDtoValidator(), allowQuotedFields:true);
 
             var result = ProcessValidationResult(validationResult);
 
@@ -48,12 +49,12 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
         return _planning;
     }
 
-    public async Task<List<CustomWorkout>> LoadPlanningFromFileAsync(string filePath)
+    public async Task<List<WorkoutDto>> LoadPlanningFromFileAsync(string filePath)
     {
         _logger.LogInformation("Loading planning from CSV: {FilePath}", filePath);
         try
         {
-            var validationResult = await CsvFileReader.ReadAndValidateCsv(filePath, CustomWorkoutMapper.FromCsvLine, new CustomWorkoutValidator());
+            var validationResult = await CsvFileReader.ReadAndValidateCsv(filePath, WorkoutMapper.FromCsvLine, new WorkoutDtoValidator());
 
             var result = ProcessValidationResult(validationResult);
 
@@ -66,7 +67,7 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
         }
     }
 
-    private CsvValidationSummary<CustomWorkout> ProcessValidationResult(Result<CsvValidationSummary<CustomWorkout>> results)
+    private CsvValidationSummary<WorkoutDto> ProcessValidationResult(Result<CsvValidationSummary<WorkoutDto>> results)
     {
         if (results.Value is null)
         {

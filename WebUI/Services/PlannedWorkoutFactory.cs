@@ -2,6 +2,7 @@ using GarminRunerz.Workout.Services.Models;
 using WebUI.Creators;
 using WebUI.Models;
 using WebUI.Models.Workouts;
+using WebUI.Services.Dtos;
 using WebUI.Services.Interfaces;
 
 namespace WebUI.Services;
@@ -21,7 +22,7 @@ public class PlannedWorkoutFactory : IPlannedWorkoutFactory
         _creators[RunType.Recovery] = _creators[RunType.Easy]; // Recovery is a subtype of Easy
     }
 
-    public PlannedWorkout Create(CustomWorkout workout, Athlete athlete, DateOnly date)
+    public PlannedWorkout Create(WorkoutDto workout, Athlete athlete, DateOnly date)
     {
         ArgumentNullException.ThrowIfNull(workout);
         ArgumentNullException.ThrowIfNull(athlete);
