@@ -42,7 +42,7 @@
     {
         if (!firstRender) return;
 
-        _planning ??= PlanningLoaderService.GetPlanning();
+        _planning = PlanningLoaderService.GetPlanning();
 
         var athlete = await AthleteSession.GetAndSetAsync();
 

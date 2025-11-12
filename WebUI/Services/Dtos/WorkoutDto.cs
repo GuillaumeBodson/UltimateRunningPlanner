@@ -4,8 +4,6 @@ namespace WebUI.Services.Dtos;
 
 public class WorkoutDto
 {
-    public int Id { get; set; }
-
     public int WeekNumber { get; set; }
 
     public RunType RunType { get; set; }

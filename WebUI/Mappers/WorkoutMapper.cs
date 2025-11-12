@@ -44,7 +44,6 @@ public static class WorkoutMapper
             TotalDuration = model.TotalDuration,
             DetailsCollection = details != null ? [details] : null,
             Description = model.Description,
-            Id = id
         };
     }
 
