@@ -11,6 +11,7 @@ public class Athlete
 
     public List<Performance> Performances { get; set; } = [];
     public HashSet<TrainingTemplate> TrainingTemplates { get; set; } = [];
+    public AthletePreferences AthletePreferences { get; set; } = new AthletePreferences();
 }
 
 public class AthleteCreation

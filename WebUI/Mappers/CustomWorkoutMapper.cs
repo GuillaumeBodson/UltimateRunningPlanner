@@ -8,25 +8,25 @@ namespace WebUI.Mappers;
 
 public static class CustomWorkoutMapper
 {
-    public static CustomWorkout FromCsvLine(string[] line)
-    {
-        if (line.Length != 9)
-        {
-            throw new ArgumentException($"Invalid CSV line. Expected 9 fields but got {line.Length}.");
-        }
-        return new CustomWorkout
-        {
-            WeekNumber = int.Parse(line[0]),
-            RunType = Enum.Parse<RunType>(line[1], true),
-            TotalDuration = int.Parse(line[2]),
-            Repetitions = int.Parse(line[3]),
-            RunDuration = double.Parse(line[4]),
-            CoolDownDuration = double.Parse(line[5]),
-            Pace = decimal.Parse(line[6], CultureInfo.InvariantCulture),
-            Speed = decimal.Parse(line[7], CultureInfo.InvariantCulture),
-            Description = line[8]
-        };
-    }
+    //public static CustomWorkout FromCsvLine(string[] line)
+    //{
+    //    if (line.Length != 9)
+    //    {
+    //        throw new ArgumentException($"Invalid CSV line. Expected 9 fields but got {line.Length}.");
+    //    }
+    //    return new CustomWorkout
+    //    {
+    //        WeekNumber = int.Parse(line[0]),
+    //        RunType = Enum.Parse<RunType>(line[1], true),
+    //        TotalDuration = int.Parse(line[2]),
+    //        Repetitions = int.Parse(line[3]),
+    //        RunDuration = double.Parse(line[4]),
+    //        CoolDownDuration = double.Parse(line[5]),
+    //        Pace = decimal.Parse(line[6], CultureInfo.InvariantCulture),
+    //        Speed = decimal.Parse(line[7], CultureInfo.InvariantCulture),
+    //        Description = line[8]
+    //    };
+    //}
 
     public static CustomWorkout ToCustomWorkout(this CustomWorkoutModel model, int weekNumber, Athlete athlete, int id)
     {
@@ -40,16 +40,31 @@ public static class CustomWorkoutMapper
             RunType.Steady => athlete.SemiMarathonPace,
             _ => athlete.EasyPace
         };
+
+        var details = model.Repetitions > 0 ? new CustomWorkoutDetails
+        {
+            Repetitions = model.Repetitions,
+            EffortDuration = (int)model.RunDuration,
+            RecoveryDuration = (int)model.CoolDownDuration,
+            Pace = pace.ToMeterPerSeconds(),
+            PaceType = model.RunType switch
+            {
+                RunType.Easy => PaceType.EasyPace,
+                RunType.LongRun => PaceType.MarathonPace,
+                RunType.Tempo => PaceType.SemiMarathonPace,
+                RunType.Intervals => PaceType.MasPace,
+                RunType.Recovery => PaceType.EasyPace,
+                RunType.Steady => PaceType.SemiMarathonPace,
+                _ => PaceType.EasyPace
+            }
+        } : null;
         return new CustomWorkout
         {
             WeekNumber = weekNumber,
             RunType = model.RunType,
             TotalDuration = model.TotalDuration,
-            Repetitions = model.Repetitions,
-            RunDuration = model.RunDuration,
-            CoolDownDuration = model.CoolDownDuration,
+            DetailsCollection = details != null ? [details] : null,
             Description = model.Description,
-            Pace = (decimal)pace.ToMinutesDouble(),
             Id = id
         };
     }
@@ -62,25 +77,27 @@ public static class CustomWorkoutMapper
             WeekNumber = w.WeekNumber,
             RunType = w.RunType,
             TotalDuration = w.TotalDuration,
-            Description = w.Description,
-            // Map Pace as minutes-per-km decimal; Speed as km/h
-            Pace = (decimal)w.Pace.ToMinutesDouble(),
-            Speed = (decimal)w.Pace.ToKmPerHour(),
+            Description = w.Description
         };
 
         if (w is StructuredWorkout s)
         {
-            result.Repetitions = s.Repetitions;
-            // Units: your domain uses seconds for durations; keep seconds here.
-            result.RunDuration = s.IntervalDuration;
-            result.CoolDownDuration = s.RecoveryDuration;
-        }
-        else
-        {
-            // Non-structured continuous run: single block
-            result.Repetitions = 0;
-            result.RunDuration = w.TotalDuration;
-            result.CoolDownDuration = 0;
+            result.DetailsCollection = s.DetailsCollection?.Select(d => new CustomWorkoutDetails
+            {
+                Repetitions = d.Repetitions,
+                EffortDuration = d.EffortDuration,
+                RecoveryDuration = d.RecoveryDuration,
+                PaceType = d.PaceType,
+                Pace = d.Pace.ToMeterPerSeconds(),
+                Details = d.Details != null ? new CustomWorkoutDetails
+                {
+                    Repetitions = d.Details.Repetitions,
+                    EffortDuration = d.Details.EffortDuration,
+                    RecoveryDuration = d.Details.RecoveryDuration,
+                    PaceType = d.Details.PaceType,
+                    Pace = d.Details.Pace.ToMeterPerSeconds()
+                } : null
+            }).ToList();    
         }
 
         return result;
@@ -89,25 +106,24 @@ public static class CustomWorkoutMapper
     public static List<CustomWorkout> ToCustomWorkouts(this IEnumerable<PlannedWorkout> workouts)
         => workouts.Select(ToCustomWorkout).ToList();
 
-    public static GarminWorkout ToGarminWorkout(string[] line)
+    public static CustomWorkout FromCsvLine(string[] line)
     {
         // a) n * (t, p, r)
-        GarminWorkoutDetails ExtractSimpleDetails(string detailsString)
+        CustomWorkoutDetails ExtractSimpleDetails(string detailsString)
         {
             var repetitionString = detailsString.Split(" * ");
             var durationString = repetitionString[1].TrimStart('(').Split(", ");
-            return new GarminWorkoutDetails
+            return new CustomWorkoutDetails
             {
                 Repetitions = int.Parse(repetitionString[0].Trim()),
                 EffortDuration = int.Parse(durationString[0]),
-                Pace = Enum.Parse<PaceType>(durationString[1], true),
+                PaceType = Enum.Parse<PaceType>(durationString[1], true),
                 RecoveryDuration = int.Parse(durationString[2])
             };
         }
 
-        GarminWorkout garminWorkout = new GarminWorkout
+        CustomWorkout garminWorkout = new CustomWorkout
         {
-            WeekNumber = int.Parse(line[0]),
             RunType = Enum.Parse<RunType>(line[1], true),
             TotalDuration = int.Parse(line[2]),
             Description = line[4],
@@ -124,7 +140,7 @@ public static class CustomWorkoutMapper
         {
             throw new ArgumentException($"Invalid CSV line. Expected 5 fields but got {line.Length}.");
         }
-        GarminWorkoutDetails? details = null;
+        CustomWorkoutDetails? details = null;
         if (!string.IsNullOrWhiteSpace(line[3]))
         {
             var deatilsString = line[3];
@@ -141,15 +157,15 @@ public static class CustomWorkoutMapper
                 var repetitionString = detailsSplit[0].Split(" * ");
 
                 var innerDurationString = repetitionString[2].Split(", ");
-                var garminDetailsInner = new GarminWorkoutDetails
+                var garminDetailsInner = new CustomWorkoutDetails
                 {
                     Repetitions = int.Parse(repetitionString[1].TrimStart('(').Trim()),
                     EffortDuration = int.Parse(innerDurationString[0].TrimStart('(')),
-                    Pace = Enum.Parse<PaceType>(repetitionString[1], true),
+                    PaceType = Enum.Parse<PaceType>(repetitionString[1], true),
                     RecoveryDuration = int.Parse(repetitionString[2])
                 };
 
-                details = new GarminWorkoutDetails
+                details = new CustomWorkoutDetails
                 {
                     Repetitions = int.Parse(repetitionString[0].Trim()),
                     Details = garminDetailsInner,
@@ -166,54 +182,60 @@ public static class CustomWorkoutMapper
                 }
             }           
         }
-        garminWorkout.Details = details;
+        if(details != null)
+            garminWorkout.DetailsCollection = [details];
 
         return garminWorkout;
     }
-}
-// temporary models that will be migrated to GarminRunerz.Workout.Services.Models later
-public class GarminWorkout
-{
-    public int Id { get; set; }
 
-    public int WeekNumber { get; set; }
-
-    public RunType RunType { get; set; }
-
-    public int TotalDuration { get; set; }
-
-    public string Description { get; set; } = string.Empty;
-
-    public GarminWorkoutDetails? Details { get; set; } = null;
-    public List<GarminWorkoutDetails>? DetailsCollection { get; set; } = null;
-}
-
-public class GarminWorkoutDetails
-{
-    public int Repetitions { get; set; }
-    public int EffortDuration { get; set; }
-    public int RecoveryDuration { get; set; }
-    public PaceType Pace { get; set; }
-    public GarminWorkoutDetails? Details { get; set; } = null;
-}
-
-public enum PaceType
-{
-    MasPace,
-    FiveKPace,
-    TenKPace,
-    SemiMarathonPace,
-    MarathonPace,
-    EasyPace
-}
-
-public class GarminWorkoutValidator: AbstractValidator<GarminWorkout>
-{
-    public GarminWorkoutValidator()
+    public static List<WorkoutDetails> ToWorkoutDetails(this IEnumerable<CustomWorkoutDetails> detailsCollection, Athlete athlete)
     {
-        RuleFor(x => x.WeekNumber).GreaterThan(0).WithMessage("Week number must be greater than 0.");
-        RuleFor(x => x.RunType).IsInEnum().WithMessage("Run type is not valid.");
-        RuleFor(x => x.TotalDuration).GreaterThan(0).WithMessage("Total duration must be greater than 0.");
-        RuleFor(x => x.Description).NotEmpty().WithMessage("Description must not be empty.");
+        List<WorkoutDetails> result = [];
+        foreach (var detail in detailsCollection)
+        {
+            var workoutDetail = new WorkoutDetails
+            {
+                Repetitions = detail.Repetitions,
+                EffortDuration = detail.EffortDuration,
+                RecoveryDuration = detail.RecoveryDuration,
+                PaceType = detail.PaceType,
+                Pace = detail.PaceType switch
+                {
+                    PaceType.MasPace => athlete.MasPace,
+                    PaceType.FiveKPace => athlete.FiveKPace,
+                    PaceType.TenKPace => athlete.TenKPace,
+                    PaceType.SemiMarathonPace => athlete.SemiMarathonPace,
+                    PaceType.MarathonPace => athlete.MarathonPace,
+                    PaceType.EasyPace => athlete.EasyPace,
+                    _ => athlete.EasyPace
+                }
+            };
+            if (detail.Details != null)
+            {
+                workoutDetail.DetailsCollection = new List<WorkoutDetails>
+                {
+                    new WorkoutDetails
+                    {
+                        Repetitions = detail.Details.Repetitions,
+                        EffortDuration = detail.Details.EffortDuration,
+                        RecoveryDuration = detail.Details.RecoveryDuration,
+                        PaceType = detail.Details.PaceType,
+                        Pace = detail.Details.PaceType switch
+                        {
+                            PaceType.MasPace => athlete.MasPace,
+                            PaceType.FiveKPace => athlete.FiveKPace,
+                            PaceType.TenKPace => athlete.TenKPace,
+                            PaceType.SemiMarathonPace => athlete.SemiMarathonPace,
+                            PaceType.MarathonPace => athlete.MarathonPace,
+                            PaceType.EasyPace => athlete.EasyPace,
+                            _ => athlete.EasyPace
+                        }
+                    }
+                };
+            }
+            result.Add(workoutDetail);
+        }
+        return result;
     }
 }
+

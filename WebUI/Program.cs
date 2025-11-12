@@ -27,6 +27,8 @@ builder.Services.AddScoped<IAthleteSession, AthleteSession>();
 // Register all concrete creators (Abstract Factory participants)
 builder.Services.AddPlannedWorkoutFactories();
 
+builder.Services.AddScoped<IWorkoutMetadataFactory,  WorkoutMetadataFactory>();
+
 builder.Services.AddScoped<IPlanningBuilder, PlanningBuilder>();
 
 // Register typed client for PaceCalculator.API

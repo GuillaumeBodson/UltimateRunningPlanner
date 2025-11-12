@@ -1,4 +1,5 @@
-﻿using Garmin = GarminRunerz.Workout.Services;
+﻿using static MudBlazor.Colors;
+using Garmin = GarminRunerz.Workout.Services;
 namespace WebUI.Models.Workouts;
 
 /// <summary>
@@ -7,100 +8,154 @@ namespace WebUI.Models.Workouts;
 /// </summary>
 public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
 {
-    private int _repetitions;
-    private int _intervalDuration;
-    private int _recoveryDuration;
-
-    public int Repetitions
+    public WorkoutDetails? Details
     {
-        get => _repetitions;
-        set
+        get
         {
-            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "Repetitions cannot be negative.");
-            _repetitions = value;
+            try
+            {
+                return DetailsCollection?.SingleOrDefault();
+            }
+            catch (InvalidOperationException)
+            {
+                return null;
+            }
         }
     }
 
-    /// <summary>
-    /// Duration (seconds) of each repetition's quality segment
-    /// </summary>
-    public int IntervalDuration
-    {
-        get => _intervalDuration;
-        set
-        {
-            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "IntervalDuration cannot be negative.");
-            _intervalDuration = value;
-        }
-    }
+    public List<WorkoutDetails>? DetailsCollection { get; set; } = null;
 
-    /// <summary>
-    /// Duration (seconds) of recovery between repetitions (not the final post-session cool-down).
-    /// </summary>
-    public int RecoveryDuration
-    {
-        get => _recoveryDuration;
-        set
-        {
-            if (value < 0) throw new ArgumentOutOfRangeException(nameof(value), "RecoveryDuration cannot be negative.");
-            _recoveryDuration = value;
-        }
-    }
 
-    public bool IsEmpty => Repetitions == 0 || IntervalDuration <= 0;
-    
-    // Override template methods for interval-based calculations
-    /// <summary>
-    /// Gets the appropriate speed for intervals based on run type.
-    /// </summary>
-    protected override decimal GetEffortSpeed(Athlete athlete)
-    {
-        return RunType switch
-        {
-            Garmin.Models.RunType.Tempo => athlete.SemiMarathonPace.ToMeterPerSeconds(),
-            Garmin.Models.RunType.Intervals => athlete.MasPace.ToMeterPerSeconds(),
-            _ => Pace.ToMeterPerSeconds()
-        };
-    }
-    
+    public bool IsEmpty => !((Details?.Repetitions ?? DetailsCollection?.Count) > 0);
+
+    public TimeSpan WarmUp { get; set; }
+
+    public TimeSpan CoolDown { get; set; }
+
     /// <summary>
     /// Calculates distance for structured workouts with intervals.
     /// </summary>
-    protected override double CalculateWorkoutDistanceCore(decimal easySpeed, decimal effortSpeed)
+    protected override double CalculateWorkoutDistanceCore(decimal easySpeed)
     {
         if (IsEmpty)
         {
-            return TotalDuration * (double)easySpeed;
+            return TotalDuration * (double)Pace.ToMeterPerSeconds();
         }
-        
+
         // Calculate interval components
-        double effortDistance = (double)effortSpeed * IntervalDuration * Repetitions;
-        double recoveryDistance = (double)easySpeed * RecoveryDuration * Repetitions;
-        
-        if (RunType is Garmin.Models.RunType.Tempo or Garmin.Models.RunType.Intervals)
+        decimal effortDistance = 0;
+        int recoveryDuration = 0;
+        foreach (var detail in DetailsCollection!)
         {
-            // Fixed warm-up/cool-down for tempo/intervals
-            double warmUpDistance = 15 * 60 * (double)easySpeed;
-            double coolDownDistance = 10 * 60 * (double)easySpeed;
-            return effortDistance + recoveryDistance + warmUpDistance + coolDownDistance;
+            if (detail.DetailsCollection?.Count > 0)
+            {
+                recoveryDuration += detail.RecoveryDuration * detail.Repetitions;
+
+                foreach (var subDetail in detail.DetailsCollection!)
+                {
+                    recoveryDuration += subDetail.Repetitions * subDetail.RecoveryDuration;
+                    int effortDuration = subDetail.Repetitions * subDetail.EffortDuration;
+                    effortDistance += (subDetail.Pace.ToMeterPerSeconds() * effortDuration);
+                }
+            }
+            else
+            {
+                int effortDuration = detail.Repetitions * detail.EffortDuration;
+                recoveryDuration += detail.Repetitions * detail.RecoveryDuration;
+                effortDistance += (detail.Pace.ToMeterPerSeconds() * effortDuration);
+            }
         }
-        else
-        {
-            // For other structured runs (e.g. long runs with intervals)
-            // Use remaining time after intervals for warm-up
-            double warmUpDuration = TotalDuration - (IntervalDuration + RecoveryDuration) * Repetitions;
-            if (warmUpDuration < 0) warmUpDuration = 0; // Safety check
-            
-            double warmUpDistance = warmUpDuration * (double)easySpeed;
-            return effortDistance + recoveryDistance + warmUpDistance;
-        }
+        var recoveryDistance = recoveryDuration * easySpeed;
+        return (double)(effortDistance + recoveryDistance);
     }
-    
+
     /// <summary>
     /// Calculates core duration for structured workouts.
     /// </summary>
     protected override int CalculateWorkoutDurationCore()
     {
-        return (IntervalDuration + RecoveryDuration) * Repetitions;
+        if (IsEmpty)
+        {
+            return 0;
+        }
+        int duration = 0;
+        foreach (var detail in DetailsCollection!)
+        {
+            if (detail.DetailsCollection?.Count > 0)
+            {
+                foreach (var subDetail in detail.DetailsCollection!)
+                {
+                    duration += subDetail.Repetitions * (subDetail.EffortDuration + subDetail.RecoveryDuration);
+                }
+                duration += detail.Repetitions * detail.RecoveryDuration;
+            }
+            else
+            {
+                duration += detail.Repetitions * (detail.EffortDuration + detail.RecoveryDuration);
+            }
+        }
+        return duration;
+    }
+    protected override int CalculateWarmUpCoolDownDuration(AthletePreferences preferences)
+    {
+        int warmUpSeconds = (int)WarmUp.TotalSeconds;
+        int coolDownSeconds = (int)CoolDown.TotalSeconds;
+
+        return warmUpSeconds + coolDownSeconds;
+    }
+
+    public int GetEffortDistance()
+    {
+        if (IsEmpty)
+        {
+            return 0;
+        }
+        decimal totalEffortDistance = 0;
+        foreach (var detail in DetailsCollection!)
+        {
+            int superSetNumber = 1;
+            if (detail.DetailsCollection?.Count > 0)
+            {
+                superSetNumber++;
+            }
+            else
+            {
+                int effortDuration = detail.Repetitions * detail.EffortDuration;
+                totalEffortDistance += superSetNumber * (detail.Pace.ToMeterPerSeconds() * effortDuration);
+            }
+        }
+        return (int)Math.Round(totalEffortDistance);
+    }
+
+    public int GetDetailsDuration()
+    {
+        return CalculateWorkoutDurationCore();
+    }
+
+    public string StringifyDetails()
+    {
+        if (IsEmpty)
+        {
+            return string.Empty;
+        }
+        List<string> parts = [];
+        foreach (var detail in DetailsCollection!)
+        {
+            int superSetNumber = 1;
+            if (detail.DetailsCollection?.Count > 0)
+            {
+                superSetNumber++;
+                List<string> subParts = new();
+                foreach (var subDetail in detail.DetailsCollection!)
+                {
+                    subParts.Add($"{detail.Repetitions} x {subDetail.Repetitions} x {subDetail.EffortDuration} @{FormatPace()} min/km");
+                }
+            }
+            else
+            {
+                parts.Add($"{detail.Repetitions} x {detail.EffortDuration} @{FormatPace()} min/km");
+            }
+        }
+        return string.Join(", ", parts);
     }
 }

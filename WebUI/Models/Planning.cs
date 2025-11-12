@@ -48,7 +48,8 @@ public class Planning
             };
         }).ToList();
 
-    public required Athlete Athlete { get; set; }
+    [JsonIgnore]
+    public Athlete Athlete { get; set; }
 
     public int GetWeekNumber(DateOnly date)
     {

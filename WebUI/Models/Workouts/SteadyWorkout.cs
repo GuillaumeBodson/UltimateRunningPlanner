@@ -9,10 +9,10 @@ public sealed class SteadyWorkout : StructuredWorkout
         get
         {
             double km = EstimatedDistance / 1000.0;
-            if (Repetitions == 0)
+            if (IsEmpty)
                 return $"W{WeekNumber} Steady run ({km}km)";
 
-            return $"W{WeekNumber} Steady run with {IntervalDuration}\" @ {FormatPace()}min/km";
+            return $"W{WeekNumber} Steady run with {StringifyDetails}";
         }
     }
 

@@ -66,7 +66,6 @@
         }
         var workout = _planning.BaseWorkouts.FirstOrDefault(w => w.Id == args.ev.Id);
         var weekNumber = _planning.GetWeekNumber(args.ev.Date);
-        workout!.WeekNumber = weekNumber;
 
         var plannedWorkout = _planning.Workouts.FirstOrDefault(w => w.Id == args.ev.Id);
         plannedWorkout!.WeekNumber = weekNumber;
@@ -105,7 +104,7 @@
             var id = NextIdForWeek(weekNumber);
 
             // Map + add to BaseWorkouts and Workouts
-            var workout = model.ToCustomWorkout(weekNumber, _planning.Athlete, id);
+            CustomWorkout workout = default;// model.ToCustomWorkout(weekNumber, _planning.Athlete, id);
             _planning.BaseWorkouts.Add(workout);
 
             var planned = WorkoutCreator.Create(workout, _planning.Athlete, date);

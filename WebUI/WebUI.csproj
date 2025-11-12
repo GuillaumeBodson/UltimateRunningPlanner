@@ -13,13 +13,14 @@
 		<PackageReference Include="Blazored.LocalStorage" Version="4.5.0" />
 		<PackageReference Include="BlazorLibraries.MudPlanner" Version="1.2.2" />
 		<PackageReference Include="FluentValidation" Version="12.1.0" />
-		<PackageReference Include="GarminRunerz.Workout.Services" Version="1.0.2" />
+		<!--<PackageReference Include="GarminRunerz.Workout.Services" Version="1.0.2" />-->
 		<PackageReference Include="MudBlazor" Version="8.14.0" />
 		<PackageReference Include="Toolbox.Utilities" Version="1.0.1" />
 	</ItemGroup>
 
 
 	<ItemGroup>
+	  <ProjectReference Include="..\..\GarminRunerz.Workout\GarminRunerz.Workout.Services\GarminRunerz.Workout.Services.csproj" />
 	  <ProjectReference Include="..\..\Toolbox\ToolBox.File\ToolBox.File.csproj" />
 	</ItemGroup>
 </Project>

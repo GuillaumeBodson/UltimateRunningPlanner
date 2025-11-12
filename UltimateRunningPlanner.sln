@@ -31,6 +31,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PaceCalculator.API", "PaceC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ToolBox.File", "..\Toolbox\ToolBox.File\ToolBox.File.csproj", "{156D8834-7579-3E05-E503-2CA8F9CBED77}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GarminRunerz.Workout.Services", "..\GarminRunerz.Workout\GarminRunerz.Workout.Services\GarminRunerz.Workout.Services.csproj", "{7D69C065-ED82-4C04-06B5-F4CCBBCE4D0A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,10 @@ Global
 		{156D8834-7579-3E05-E503-2CA8F9CBED77}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{156D8834-7579-3E05-E503-2CA8F9CBED77}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{156D8834-7579-3E05-E503-2CA8F9CBED77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D69C065-ED82-4C04-06B5-F4CCBBCE4D0A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D69C065-ED82-4C04-06B5-F4CCBBCE4D0A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D69C065-ED82-4C04-06B5-F4CCBBCE4D0A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D69C065-ED82-4C04-06B5-F4CCBBCE4D0A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
