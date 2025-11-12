@@ -85,24 +85,13 @@
         {
             var planning = PlanningBuilder.BuildPlanning(_startDateTime!.Value, _workouts!, _athlete!, _trainingTemplates);
 
-            var jsonOptions = new JsonSerializerOptions
-            {
-                WriteIndented = false,
-            };
-            jsonOptions.Converters.Add(new PlannedWorkoutJsonConverter());
-            jsonOptions.Converters.Add(new PaceJsonConverter());
-            jsonOptions.Converters.Add(new TrainingTemplateCollectionJsonConverter());
-            jsonOptions.Converters.Add(new TrainingTemplateConverter());
-
-            var test = JsonSerializer.Serialize(planning, jsonOptions);
-
             planning.BaseWorkouts = [];
 
             PlanningLoaderService.LoadPlanning(planning);
 
             Snackbar.Add("Planning saved successfully", Severity.Success);
         }
-        catch (Exception ex)
+        catch (Exception)
         {
             Snackbar.Add("Failed to save planning", Severity.Error);
             throw;

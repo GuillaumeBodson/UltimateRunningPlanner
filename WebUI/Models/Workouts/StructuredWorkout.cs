@@ -1,6 +1,4 @@
-﻿using static MudBlazor.Colors;
-using Garmin = GarminRunerz.Workout.Services;
-namespace WebUI.Models.Workouts;
+﻿namespace WebUI.Models.Workouts;
 
 /// <summary>
 /// Base for workouts composed of repetitions with run + recovery segments.
@@ -26,7 +24,7 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
     public List<WorkoutDetails>? DetailsCollection { get; set; } = null;
 
 
-    public bool IsEmpty => !((Details?.Repetitions ?? DetailsCollection?.Count) > 0);
+    public bool IsEmpty => (Details?.Repetitions ?? DetailsCollection?.Count) <= 0;
 
     public TimeSpan WarmUp { get; set; }
 
@@ -113,15 +111,18 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
         decimal totalEffortDistance = 0;
         foreach (var detail in DetailsCollection!)
         {
-            int superSetNumber = 1;
             if (detail.DetailsCollection?.Count > 0)
             {
-                superSetNumber++;
+                totalEffortDistance += detail.Repetitions * detail.DetailsCollection!.Sum(subDetail =>
+                {
+                    int effortDuration = subDetail.Repetitions * subDetail.EffortDuration;
+                    return subDetail.Pace.ToMeterPerSeconds() * effortDuration;
+                });
             }
             else
             {
                 int effortDuration = detail.Repetitions * detail.EffortDuration;
-                totalEffortDistance += superSetNumber * (detail.Pace.ToMeterPerSeconds() * effortDuration);
+                totalEffortDistance += detail.Pace.ToMeterPerSeconds() * effortDuration;
             }
         }
         return (int)Math.Round(totalEffortDistance);
@@ -141,15 +142,14 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
         List<string> parts = [];
         foreach (var detail in DetailsCollection!)
         {
-            int superSetNumber = 1;
             if (detail.DetailsCollection?.Count > 0)
             {
-                superSetNumber++;
                 List<string> subParts = new();
                 foreach (var subDetail in detail.DetailsCollection!)
                 {
                     subParts.Add($"{detail.Repetitions} x {subDetail.Repetitions} x {subDetail.EffortDuration} @{FormatPace()} min/km");
                 }
+                parts.Add(string.Join(", ", subParts));
             }
             else
             {

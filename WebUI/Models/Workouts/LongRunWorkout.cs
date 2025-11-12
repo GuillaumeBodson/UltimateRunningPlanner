@@ -12,7 +12,7 @@ public sealed class LongRunWorkout : StructuredWorkout
             if (IsEmpty)
                 return $"W{WeekNumber} Long run ({km}km)";
 
-            return $"W{WeekNumber} Long run with {StringifyDetails}";
+            return $"W{WeekNumber} Long run with {StringifyDetails()}";
         }
     }
 

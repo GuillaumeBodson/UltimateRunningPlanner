@@ -12,7 +12,7 @@ public sealed class SteadyWorkout : StructuredWorkout
             if (IsEmpty)
                 return $"W{WeekNumber} Steady run ({km}km)";
 
-            return $"W{WeekNumber} Steady run with {StringifyDetails}";
+            return $"W{WeekNumber} Steady run with {StringifyDetails()}";
         }
     }
 

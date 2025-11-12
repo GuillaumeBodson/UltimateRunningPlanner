@@ -104,7 +104,7 @@
             var id = NextIdForWeek(weekNumber);
 
             // Map + add to BaseWorkouts and Workouts
-            CustomWorkout workout = default;// model.ToCustomWorkout(weekNumber, _planning.Athlete, id);
+            var workout = model.ToCustomWorkout(weekNumber, _planning.Athlete, id);
             _planning.BaseWorkouts.Add(workout);
 
             var planned = WorkoutCreator.Create(workout, _planning.Athlete, date);

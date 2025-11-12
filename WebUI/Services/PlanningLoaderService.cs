@@ -48,29 +48,6 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
         return _planning;
     }
 
-    //public async Task<List<GarminWorkout>> LoadPlanningAsync2(Stream fileStream)
-    //{
-    //    _logger.LogInformation("Loading csv information from stream ");
-    //    try
-    //    {
-    //        var validationResult = await CsvFileReader.ReadAndValidateCsvStreamAsync(fileStream, CustomWorkoutMapper.ToGarminWorkout, new GarminWorkoutValidator(), allowQuotedFields:true);
-
-    //        if(validationResult.IsFailure)
-    //        {
-    //            _logger.LogError("Failed to validate Garmin workouts from stream: {Error}", validationResult.Exception?.Message);
-    //            throw validationResult.Exception!;
-    //        }
-
-
-    //        return validationResult.Value.ValidEntities.ToList();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        _logger.LogError(ex, "Failed to load planning from stream");
-    //        throw;
-    //    }
-    //}
-
     public async Task<List<CustomWorkout>> LoadPlanningFromFileAsync(string filePath)
     {
         _logger.LogInformation("Loading planning from CSV: {FilePath}", filePath);

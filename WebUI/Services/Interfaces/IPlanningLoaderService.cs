@@ -1,5 +1,4 @@
 using GarminRunerz.Workout.Services.Models;
-using WebUI.Mappers;
 using WebUI.Models;
 
 namespace WebUI.Services.Interfaces;

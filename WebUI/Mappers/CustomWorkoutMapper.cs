@@ -1,6 +1,4 @@
-﻿using FluentValidation;
-using GarminRunerz.Workout.Services.Models;
-using System.Globalization;
+﻿using GarminRunerz.Workout.Services.Models;
 using WebUI.Models;
 using WebUI.Models.Workouts;
 
@@ -8,26 +6,6 @@ namespace WebUI.Mappers;
 
 public static class CustomWorkoutMapper
 {
-    //public static CustomWorkout FromCsvLine(string[] line)
-    //{
-    //    if (line.Length != 9)
-    //    {
-    //        throw new ArgumentException($"Invalid CSV line. Expected 9 fields but got {line.Length}.");
-    //    }
-    //    return new CustomWorkout
-    //    {
-    //        WeekNumber = int.Parse(line[0]),
-    //        RunType = Enum.Parse<RunType>(line[1], true),
-    //        TotalDuration = int.Parse(line[2]),
-    //        Repetitions = int.Parse(line[3]),
-    //        RunDuration = double.Parse(line[4]),
-    //        CoolDownDuration = double.Parse(line[5]),
-    //        Pace = decimal.Parse(line[6], CultureInfo.InvariantCulture),
-    //        Speed = decimal.Parse(line[7], CultureInfo.InvariantCulture),
-    //        Description = line[8]
-    //    };
-    //}
-
     public static CustomWorkout ToCustomWorkout(this CustomWorkoutModel model, int weekNumber, Athlete athlete, int id)
     {
         var pace = model.RunType switch
@@ -143,8 +121,8 @@ public static class CustomWorkoutMapper
         CustomWorkoutDetails? details = null;
         if (!string.IsNullOrWhiteSpace(line[3]))
         {
-            var deatilsString = line[3];
-            var detailsSplit = deatilsString.Split("), ");
+            var detailsString = line[3];
+            var detailsSplit = detailsString.Split("), ");
 
             // a) n * (t, p, r)
             if (detailsSplit.Length == 1)
@@ -161,8 +139,8 @@ public static class CustomWorkoutMapper
                 {
                     Repetitions = int.Parse(repetitionString[1].TrimStart('(').Trim()),
                     EffortDuration = int.Parse(innerDurationString[0].TrimStart('(')),
-                    PaceType = Enum.Parse<PaceType>(repetitionString[1], true),
-                    RecoveryDuration = int.Parse(repetitionString[2])
+                    PaceType = Enum.Parse<PaceType>(innerDurationString[1], true),
+                    RecoveryDuration = int.Parse(innerDurationString[2])
                 };
 
                 details = new CustomWorkoutDetails
