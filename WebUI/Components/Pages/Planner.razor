@@ -9,8 +9,9 @@
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject ISnackbar Snackbar
 @inject IPlanningLoaderService PlanningLoaderService
-@inject IAthleteSession AthleteSession
+@inject ISession<Athlete> AthleteSession
 @inject IPlanningBuilder PlanningBuilder
+@inject ISession<Planning> PlanningSession
 @rendermode InteractiveServer
 
 <PageTitle>Planner</PageTitle>
@@ -64,7 +65,7 @@
     {
         if (firstRender)
         {
-            _athlete = await AthleteSession.GetAndSetAsync();
+            _athlete = await AthleteSession.GetAsync();
 
             StateHasChanged();
         }
@@ -87,9 +88,7 @@
         {
             var planning = PlanningBuilder.BuildPlanning(_startDateTime!.Value, _workouts!, _athlete!, _trainingTemplates);
 
-            await localStorage.SetItemAsync("planning", planning);
-
-            PlanningLoaderService.LoadPlanning(planning);
+            await PlanningSession.SetAsync(planning);
 
             Snackbar.Add("Planning saved successfully", Severity.Success);
         }

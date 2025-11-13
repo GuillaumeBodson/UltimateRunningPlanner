@@ -33,22 +33,6 @@ public sealed class PlanningLoaderService(ILogger<PlanningLoaderService> logger)
         }
     }
 
-    public void LoadPlanning(Planning planning)
-    {
-        _logger.LogInformation("Loading planning");
-        _planning = planning;
-    }
-
-    public Planning GetPlanning()
-    {
-        if (_planning is null)
-        {
-            throw new InvalidOperationException("Planning has not been loaded.");
-        }
-        _logger.LogInformation("Retrieving loaded planning");
-        return _planning;
-    }
-
     public async Task<List<WorkoutDto>> LoadPlanningFromFileAsync(string filePath)
     {
         _logger.LogInformation("Loading planning from CSV: {FilePath}", filePath);

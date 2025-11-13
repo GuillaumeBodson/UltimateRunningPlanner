@@ -5,7 +5,7 @@
 @using WebUI.Models.Workouts
 @using WebUI.Services.Interfaces
 @inject ILocalStorageService localStorage
-@inject IPlanningLoaderService PlanningLoaderService
+@inject ISession<Planning> PlanningSession
 @rendermode InteractiveServer
 
 <PageTitle>Statistics</PageTitle>
@@ -118,7 +118,7 @@
 
     private async Task LoadStatisticsData()
     {
-        var planning = PlanningLoaderService.GetPlanning();
+        var planning = PlanningSession.Current;
 
         if (planning?.Workouts?.Any() != true)
         {

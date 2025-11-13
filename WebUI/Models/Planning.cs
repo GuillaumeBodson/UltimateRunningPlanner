@@ -1,8 +1,6 @@
-﻿using GarminRunerz.Workout.Services.Models;
-using System.MudPlanner;
+﻿using System.MudPlanner;
 using System.Text.Json.Serialization;
 using Toolbox.Utilities;
-using WebUI.Mappers;
 using WebUI.Models.Workouts;
 using static WebUI.Models.Planning.RemovalResult;
 

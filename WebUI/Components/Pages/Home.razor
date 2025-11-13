@@ -2,7 +2,7 @@
 @using WebUI.Components.Standalone.AthleteManagement
 @using WebUI.Models
 @using WebUI.Services.Interfaces
-@inject IAthleteSession AthleteSession
+@inject ISession<Athlete> AthleteSession
 @inject ISnackbar Snackbar
 @rendermode InteractiveServer
 
@@ -53,7 +53,7 @@
     {
         if (firstRender)
         {
-            var fromStorage = await AthleteSession.GetAndSetAsync();
+            var fromStorage = await AthleteSession.GetAsync();
             if (fromStorage is not null)
             {
                 _athlete = fromStorage;
@@ -98,13 +98,13 @@
 
     private async Task SaveAthleteAsync()
     {
-        await AthleteSession.StoreAsync(_athlete);
+        await AthleteSession.SetAsync(_athlete);
         Snackbar.Add("Athlete saved successfully", Severity.Success);
     }
 
     private async Task ResetAsync()
     {
-        var fromStorage = await AthleteSession.GetAndSetAsync();
+        var fromStorage = await AthleteSession.GetAsync();
         _athlete = fromStorage ?? new Athlete();
         _athlete.Performances ??= new();
         _athleteCreation = new AthleteCreation(_athlete);
@@ -114,7 +114,7 @@
 
     private async Task ClearStorageAsync()
     {
-        await AthleteSession.RemoveAsync();
+        await AthleteSession.ClearAsync();
         _athlete = new Athlete();
         _athlete.Performances = new();
         _athleteCreation = new AthleteCreation();

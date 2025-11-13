@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using WebUI.Models;
 using WebUI.Services;
 using WebUI.Services.Interfaces;
 
@@ -19,6 +20,14 @@ public static class ServiceRegistrationExtension
                 throw new InvalidOperationException($"PaceCalculatorApi:BaseUrl '{options.BaseUrl}' is not a valid absolute URI.");
             http.BaseAddress = baseUri;
         });
+
+        return services;
+    }
+
+    public static IServiceCollection AddSessions(this IServiceCollection services)
+    {
+        services.AddScoped<ISession<Athlete>, AthleteSession>();
+        services.AddScoped<ISession<Planning>, PlanningSession>();
 
         return services;
     }
