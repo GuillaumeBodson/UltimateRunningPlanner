@@ -15,6 +15,7 @@ builder.Services.AddRazorComponents()
 builder.Services.AddBlazoredLocalStorage(c =>
 {
     c.JsonSerializerOptions.WriteIndented = false;
+    
 });
 builder.Services.AddMudServices();
 builder.Services.AddWorkoutServices();
@@ -22,7 +23,7 @@ builder.Services.AddScoped<IPlanningLoaderService, PlanningLoaderService>();
 builder.Services.AddScoped<IPaceCalculationService, PaceCalculationService>();
 
 // Per-circuit session state
-builder.Services.AddScoped<IAthleteSession, AthleteSession>();
+builder.Services.AddSessions();
 
 // Register all concrete creators (Abstract Factory participants)
 builder.Services.AddPlannedWorkoutFactories();

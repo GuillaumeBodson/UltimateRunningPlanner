@@ -1,6 +1,5 @@
 ﻿@page "/calendar"
 @rendermode InteractiveServer
-
 @using System.Collections.ObjectModel
 @using System.MudPlanner
 @using BlazorApp.Components
@@ -14,12 +13,12 @@
 @using WebUI.Services.Interfaces
 @using static WebUI.Models.Planning.RemovalResult
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
-@inject IAthleteSession AthleteSession
+@inject ISession<Athlete> AthleteSession
 @inject IDialogService Dialog
 @inject IPlannedWorkoutFactory WorkoutCreator
 @inject ISnackbar Snackbar
 @inject ILogger<CalendarPage> Logger
-@inject IPlanningLoaderService PlanningLoaderService
+@inject ISession<Planning> PlanningSession
 
 <PageTitle>Calendar</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
@@ -42,9 +41,9 @@
     {
         if (!firstRender) return;
 
-        _planning = PlanningLoaderService.GetPlanning();
+        _planning = PlanningSession.Current;
 
-        var athlete = await AthleteSession.GetAndSetAsync();
+        var athlete = await AthleteSession.GetAsync();
 
         if (_planning is null)
         {

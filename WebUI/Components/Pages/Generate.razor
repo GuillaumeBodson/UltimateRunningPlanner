@@ -15,9 +15,9 @@
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 @inject IWorkoutGeneratorService WorkoutGeneratorService
-@inject IPlanningLoaderService PlanningLoaderService
 @inject IWorkoutMetadataFactory WorkoutMetadataFactory
-@inject IAthleteSession AthleteSession
+@inject ISession<Athlete> AthleteSession
+@inject ISession<Planning> PlanningSession
 
 <PageTitle>Generate</PageTitle>
 
@@ -44,7 +44,7 @@
     {
         if (!firstRender) return;
 
-        _planning = PlanningLoaderService.GetPlanning();
+        _planning = PlanningSession.Current;
         if (_planning is not null)
         {
             Workouts = _planning.Workouts
@@ -52,7 +52,7 @@
                 .ToList();
         }
 
-        Athlete = await AthleteSession.GetAndSetAsync();
+        Athlete = await AthleteSession.GetAsync();
         StateHasChanged();
     }
 
