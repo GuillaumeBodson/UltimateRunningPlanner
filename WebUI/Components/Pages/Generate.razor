@@ -11,7 +11,6 @@
 @using WebUI.Models.Workouts
 @using WebUI.Services
 @using WebUI.Services.Interfaces
-@inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject IJSRuntime JS
 @rendermode InteractiveServer
 @inject IWorkoutGeneratorService WorkoutGeneratorService
@@ -44,7 +43,7 @@
     {
         if (!firstRender) return;
 
-        _planning = PlanningSession.Current;
+        _planning = await PlanningSession.GetAsync();
         if (_planning is not null)
         {
             Workouts = _planning.Workouts

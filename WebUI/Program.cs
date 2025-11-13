@@ -2,6 +2,7 @@ using Blazored.LocalStorage;
 using GarminRunerz.Workout.Services;
 using MudBlazor.Services;
 using WebUI.Components;
+using WebUI.Converters;
 using WebUI.DI;
 using WebUI.Services;
 using WebUI.Services.Interfaces;
@@ -12,10 +13,18 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
+builder.Services.AddSignalR(hubOptions =>
+{
+    hubOptions.MaximumReceiveMessageSize = 100 * 1024; // 100 KB
+});
+
 builder.Services.AddBlazoredLocalStorage(c =>
 {
     c.JsonSerializerOptions.WriteIndented = false;
-    
+    c.JsonSerializerOptions.Converters.Add(new PaceJsonConverter());
+    c.JsonSerializerOptions.Converters.Add(new PlannedWorkoutJsonConverter());
+    c.JsonSerializerOptions.Converters.Add(new TrainingTemplateCollectionJsonConverter());
+    c.JsonSerializerOptions.Converters.Add(new TrainingTemplateConverter());
 });
 builder.Services.AddMudServices();
 builder.Services.AddWorkoutServices();

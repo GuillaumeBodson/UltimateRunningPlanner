@@ -6,7 +6,6 @@
 @using WebUI.Models
 @using WebUI.Services.Dtos
 @using WebUI.Services.Interfaces
-@inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject ISnackbar Snackbar
 @inject IPlanningLoaderService PlanningLoaderService
 @inject ISession<Athlete> AthleteSession
@@ -87,7 +86,7 @@
         try
         {
             var planning = PlanningBuilder.BuildPlanning(_startDateTime!.Value, _workouts!, _athlete!, _trainingTemplates);
-
+            
             await PlanningSession.SetAsync(planning);
 
             Snackbar.Add("Planning saved successfully", Severity.Success);

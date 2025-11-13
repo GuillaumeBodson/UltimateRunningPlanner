@@ -78,7 +78,7 @@
     }
 </MudContainer>
 
-@code {
+    @code {
     private bool IsLoading = true;
     private List<WeeklyAnalyticsData> WeeklyData = new();
     private List<ChartSeries> Series = new();
@@ -118,7 +118,7 @@
 
     private async Task LoadStatisticsData()
     {
-        var planning = PlanningSession.Current;
+        var planning = await PlanningSession.GetAsync();
 
         if (planning?.Workouts?.Any() != true)
         {
