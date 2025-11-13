@@ -13,7 +13,7 @@ public sealed class AthleteSession : Session<Athlete>, ISession<Athlete>
     }
 }
 
-public class PlanningSession : Session<Planning>, ISession<Planning>
+public sealed class PlanningSession : Session<Planning>, ISession<Planning>
 {
     protected override string Key => Constants.PlanningKey;
     public PlanningSession(ILocalStorageService localStorageService) : base(localStorageService)

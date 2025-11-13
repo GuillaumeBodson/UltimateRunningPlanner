@@ -43,8 +43,6 @@
 
         _planning = PlanningSession.Current;
 
-        var athlete = await AthleteSession.GetAsync();
-
         if (_planning is null)
         {
             CalendarEvents = [];

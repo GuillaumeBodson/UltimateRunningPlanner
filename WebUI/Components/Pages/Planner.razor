@@ -88,8 +88,6 @@
         {
             var planning = PlanningBuilder.BuildPlanning(_startDateTime!.Value, _workouts!, _athlete!, _trainingTemplates);
 
-            await localStorage.SetItemAsync("planning", planning);
-
             await PlanningSession.SetAsync(planning);
 
             Snackbar.Add("Planning saved successfully", Severity.Success);

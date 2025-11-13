@@ -8,6 +8,6 @@ public interface ISession<T> where T : class
     void Clear();
     Task ClearAsync();
     Task<T?> GetAsync();
-    void Set(T? value);
-    Task SetAsync(T? value);
+    void Set(T value);
+    Task SetAsync(T value);
 }

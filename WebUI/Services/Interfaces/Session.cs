@@ -14,8 +14,8 @@ public abstract class Session<T> : ISession<T> where T : class
     {
         _localStorageService = localStorageService;
     }
-    public void Set(T? value) => _value = value ?? throw new ArgumentNullException(nameof(value));
-    public async Task SetAsync(T? value)
+    public void Set(T value) => _value = value ?? throw new ArgumentNullException(nameof(value));
+    public async Task SetAsync(T value)
     {
         Set(value);
         await _localStorageService.SetItemAsync(Key, _value);
@@ -35,5 +35,9 @@ public abstract class Session<T> : ISession<T> where T : class
         return value;
     }
     public void Clear() => _value = default;
-    public async Task ClearAsync() => await _localStorageService.RemoveItemAsync(Key);
+    public async Task ClearAsync()
+    { 
+        Clear(); 
+        await _localStorageService.RemoveItemAsync(Key); 
+    }
 }
