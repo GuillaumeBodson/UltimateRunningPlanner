@@ -1,6 +1,7 @@
 ﻿@using System.Globalization
 @using GarminRunerz.Workout.Services.Models
 @using WebUI.Models
+@using WebUI.Services.Dtos
 @using WebUI.Services.Interfaces
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject ISnackbar Snackbar
@@ -55,7 +56,7 @@
     private bool _isLoading;
     private string? _lastImportSummary;
     [Parameter]
-    public EventCallback<(DateOnly startDate, List<CustomWorkout> workouts)> WorkoutLoaded { get; set; }
+    public EventCallback<(DateOnly startDate, List<WorkoutDto> workouts)> WorkoutLoaded { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -86,17 +87,15 @@
             var file = e.File;
             using var stream = file.OpenReadStream();
 
-            var workouts = await PlanningLoaderService.LoadPlanningAsync(stream)
+            var workouts = await PlanningLoaderService.ReadCustomWorkoutsAsync(stream)
                 ?? throw new InvalidOperationException("No workouts found in the imported file.");
-            
-            var count = workouts.Count;
 
-            if (count > 0 && WorkoutLoaded.HasDelegate)
+            if (workouts.Count > 0 && WorkoutLoaded.HasDelegate)
             {
                 await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts));
             }
 
-            _lastImportSummary = $"Imported {count} workouts from “{file.Name}”.";
+            _lastImportSummary = $"Imported {workouts.Count} workouts from “{file.Name}”.";
             Snackbar.Add(_lastImportSummary, Severity.Success);
         }
         catch (Exception ex)

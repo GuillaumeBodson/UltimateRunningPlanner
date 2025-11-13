@@ -1,9 +1,12 @@
-using GarminRunerz.Workout.Services.Models;
+using WebUI.Models;
+using WebUI.Services.Dtos;
 
 namespace WebUI.Services.Interfaces;
 
 public interface IPlanningLoaderService
 {
-    Task<List<CustomWorkout>> LoadPlanningFromFileAsync(string filePath);
-    Task<List<CustomWorkout>> LoadPlanningAsync(Stream fileStream);
+    Planning GetPlanning();
+    void LoadPlanning(Planning planning);
+    Task<List<WorkoutDto>> LoadPlanningFromFileAsync(string filePath);
+    Task<List<WorkoutDto>> ReadCustomWorkoutsAsync(Stream fileStream);
 }

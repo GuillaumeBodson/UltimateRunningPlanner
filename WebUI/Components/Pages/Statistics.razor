@@ -3,7 +3,9 @@
 @using Blazored.LocalStorage
 @using WebUI.Models
 @using WebUI.Models.Workouts
+@using WebUI.Services.Interfaces
 @inject ILocalStorageService localStorage
+@inject IPlanningLoaderService PlanningLoaderService
 @rendermode InteractiveServer
 
 <PageTitle>Statistics</PageTitle>
@@ -116,7 +118,7 @@
 
     private async Task LoadStatisticsData()
     {
-        var planning = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
+        var planning = PlanningLoaderService.GetPlanning();
 
         if (planning?.Workouts?.Any() != true)
         {
@@ -154,6 +156,6 @@
         if (workout is not IStructuredWorkout structuredWorkout || structuredWorkout.IsEmpty)
             return 0d;
 
-        return structuredWorkout.Repetitions * structuredWorkout.IntervalDuration * (double)workout.Pace.ToMeterPerSeconds() / 1000d;
+        return structuredWorkout.GetEffortDistance() / 1000d;
     }
 }

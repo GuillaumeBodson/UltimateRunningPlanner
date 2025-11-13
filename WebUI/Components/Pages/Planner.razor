@@ -1,7 +1,10 @@
 ﻿@page "/planner"
 @using GarminRunerz.Workout.Services.Models
+@using System.Text.Json
 @using WebUI.Components.Standalone.PlannerPages
+@using WebUI.Converters
 @using WebUI.Models
+@using WebUI.Services.Dtos
 @using WebUI.Services.Interfaces
 @inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject ISnackbar Snackbar
@@ -54,7 +57,7 @@
 @code {
     private DateOnly? _startDateTime;
     private Athlete? _athlete;
-    private List<CustomWorkout>? _workouts;
+    private List<WorkoutDto>? _workouts;
     private List<TrainingTemplate>? _trainingTemplates;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -62,11 +65,12 @@
         if (firstRender)
         {
             _athlete = await AthleteSession.GetAndSetAsync();
+
             StateHasChanged();
         }
     }
 
-    private void OnWorkoutLoaded((DateOnly startDate, List<CustomWorkout> workouts) args)
+    private void OnWorkoutLoaded((DateOnly startDate, List<WorkoutDto> workouts) args)
     {
         (_startDateTime, _workouts) = (args.startDate, args.workouts);
         StateHasChanged();
@@ -82,7 +86,11 @@
         try
         {
             var planning = PlanningBuilder.BuildPlanning(_startDateTime!.Value, _workouts!, _athlete!, _trainingTemplates);
-            await localStorage.SetItemAsync(Constants.PlanningKey, planning);
+
+            await localStorage.SetItemAsync("planning", planning);
+
+            PlanningLoaderService.LoadPlanning(planning);
+
             Snackbar.Add("Planning saved successfully", Severity.Success);
         }
         catch (Exception)

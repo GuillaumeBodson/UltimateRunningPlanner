@@ -38,12 +38,10 @@ public abstract class PlannedWorkout
 
         // Get speeds based on athlete data
         var easySpeed = athlete.EasyPace.ToMeterPerSeconds();
-        
-        // Allow subclasses to provide custom effort speed
-        var effortSpeed = GetEffortSpeed(athlete);
-        
+        int warmUpCoolDownDuration = CalculateWarmUpCoolDownDuration(athlete.AthletePreferences);
+
         // Calculate distances based on workout structure
-        double distance = CalculateWorkoutDistanceCore(easySpeed, effortSpeed);
+        double distance = CalculateWorkoutDistanceCore(easySpeed) + (warmUpCoolDownDuration * (double)easySpeed);
         
         // Round to nearest 100m (consistent with original)
         return (int)Math.Ceiling(distance / 100) * 100;
@@ -52,32 +50,33 @@ public abstract class PlannedWorkout
     /// <summary>
     /// Calculates the estimated duration for this workout.
     /// </summary>
-    public int CalculateEstimatedDuration()
+    public int CalculateEstimatedDuration(AthletePreferences preferences)
     {
-        // Base implementation for continuous runs
-        int warmUpDuration = 15 * 60; // 15 minutes in seconds
-        int coolDownDuration = 10 * 60; // 10 minutes in seconds
-        
+        ArgumentNullException.ThrowIfNull(preferences);
+
+        int warmUpCoolDownDuration = CalculateWarmUpCoolDownDuration(preferences);        
+
         // Allow subclasses to add workout-specific duration
         int workoutSpecificDuration = CalculateWorkoutDurationCore();
         
-        return warmUpDuration + workoutSpecificDuration + coolDownDuration;
+        return workoutSpecificDuration + warmUpCoolDownDuration;
     }
-    
-    // Template methods - default implementations
-    /// <summary>
-    /// Calculates the speed used for effort segments based on the athlete's profile.
-    /// </summary>
-    protected virtual decimal GetEffortSpeed(Athlete athlete)
+
+    protected virtual int CalculateWarmUpCoolDownDuration(AthletePreferences preferences)
     {
-        // Default to the workout's own pace
-        return athlete.EasyPace.ToMeterPerSeconds();
+        var workoutPrefs = preferences.GetPreferencesForRunType(RunType);
+
+        int warmUpDuration = (int)(workoutPrefs.WarmUpDuration?.TotalSeconds ?? 0);
+        int coolDownDuration = (int)(workoutPrefs.CoolDownDuration?.TotalSeconds ?? 0);
+
+        return warmUpDuration + coolDownDuration;
     }
-    
+
+
     /// <summary>
     /// Core distance calculation logic. Override in subclasses for specific workout types.
     /// </summary>
-    protected virtual double CalculateWorkoutDistanceCore(decimal easySpeed, decimal effortSpeed)
+    protected virtual double CalculateWorkoutDistanceCore(decimal easySpeed)
     {
         // Base implementation for continuous runs
         return TotalDuration * (double)easySpeed;
@@ -99,10 +98,5 @@ public abstract class PlannedWorkout
     private string CalendarEventName()
     {
         return $"W{WeekNumber} {EventLabel} {Math.Round(EstimatedDistance / 1000.0, 1)}km";
-    }
-
-    protected string FormatPace()
-    {
-        return Pace.ToMinutesDouble().ToString("0.##", CultureInfo.InvariantCulture);
     }
 }

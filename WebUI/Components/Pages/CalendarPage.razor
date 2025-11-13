@@ -19,6 +19,7 @@
 @inject IPlannedWorkoutFactory WorkoutCreator
 @inject ISnackbar Snackbar
 @inject ILogger<CalendarPage> Logger
+@inject IPlanningLoaderService PlanningLoaderService
 
 <PageTitle>Calendar</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
@@ -41,7 +42,7 @@
     {
         if (!firstRender) return;
 
-        _planning = await localStorage.GetItemAsync<Planning>(Constants.PlanningKey);
+        _planning = PlanningLoaderService.GetPlanning();
 
         var athlete = await AthleteSession.GetAndSetAsync();
 
@@ -64,12 +65,17 @@
             Snackbar.Add("No planning loaded. Cannot save workout changes.", Severity.Error);
             return;
         }
-        var workout = _planning.BaseWorkouts.FirstOrDefault(w => w.Id == args.ev.Id);
         var weekNumber = _planning.GetWeekNumber(args.ev.Date);
-        workout!.WeekNumber = weekNumber;
 
         var plannedWorkout = _planning.Workouts.FirstOrDefault(w => w.Id == args.ev.Id);
-        plannedWorkout!.WeekNumber = weekNumber;
+
+        if (plannedWorkout is null)
+        {
+            Snackbar.Add($"Workout with ID {args.ev.Id} not found in planning.", Severity.Error);
+            return;
+        }
+
+        plannedWorkout.WeekNumber = weekNumber;
         plannedWorkout.Date = args.ev.Date;
 
         await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
@@ -105,8 +111,7 @@
             var id = NextIdForWeek(weekNumber);
 
             // Map + add to BaseWorkouts and Workouts
-            var workout = model.ToCustomWorkout(weekNumber, _planning.Athlete, id);
-            _planning.BaseWorkouts.Add(workout);
+            var workout = model.ToWorkoutDto(weekNumber, _planning.Athlete, id);
 
             var planned = WorkoutCreator.Create(workout, _planning.Athlete, date);
             _planning.Workouts.Add(planned);

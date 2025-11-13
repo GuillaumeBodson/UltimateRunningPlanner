@@ -1,6 +1,7 @@
 using GarminRunerz.Workout.Services.Models;
 using WebUI.Models;
 using WebUI.Models.Workouts;
+using WebUI.Services.Dtos;
 
 namespace WebUI.Creators;
 
@@ -10,5 +11,5 @@ namespace WebUI.Creators;
 public interface IPlannedWorkoutCreator
 {
     bool CanCreate(RunType runType);
-    PlannedWorkout Create(CustomWorkout workout, Athlete athlete, DateOnly date);
+    PlannedWorkout Create(WorkoutDto workout, Athlete athlete, DateOnly date);
 }
