@@ -28,14 +28,11 @@ public interface IWorkoutPreferences
 
 public sealed class WorkoutPreferences : IWorkoutPreferences
 {
-    private static readonly TimeSpan DefaultWarmUp = TimeSpan.FromMinutes(15);
-    private static readonly TimeSpan DefaultCoolDown = TimeSpan.FromMinutes(10);
-
-    private TimeSpan _warmUpDuration = DefaultWarmUp;
-    private TimeSpan _coolDownDuration = DefaultCoolDown;
+    private TimeSpan? _warmUpDuration;
+    private TimeSpan? _coolDownDuration;
 
 
-    public bool IncludeWarmUpCoolDown => WarmUpDuration.HasValue || CoolDownDuration.HasValue;
+    public bool IncludeWarmUpCoolDown => WarmUpDuration > TimeSpan.Zero|| CoolDownDuration > TimeSpan.Zero;
     public TimeSpan? WarmUpDuration
     {
         get => _warmUpDuration;
@@ -74,7 +71,7 @@ public static class WorkoutPreferenceFactory
 {
     public static Dictionary<RunType, IWorkoutPreferences?> CreateDefaults() => new()
     {
-        { RunType.Easy,      new WorkoutPreferences(null, null) },
+        { RunType.Easy,      null },
         { RunType.LongRun,   new WorkoutPreferences(null, null) },
         { RunType.Tempo,     new WorkoutPreferences(TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(10)) },
         { RunType.Intervals, new WorkoutPreferences(TimeSpan.FromMinutes(15), TimeSpan.FromMinutes(10)) },

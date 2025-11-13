@@ -99,9 +99,4 @@ public abstract class PlannedWorkout
     {
         return $"W{WeekNumber} {EventLabel} {Math.Round(EstimatedDistance / 1000.0, 1)}km";
     }
-
-    protected string FormatPace()
-    {
-        return Pace.ToMinutesDouble().ToString("0.##", CultureInfo.InvariantCulture);
-    }
 }

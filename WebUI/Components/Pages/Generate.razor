@@ -17,6 +17,7 @@
 @inject IWorkoutGeneratorService WorkoutGeneratorService
 @inject IPlanningLoaderService PlanningLoaderService
 @inject IWorkoutMetadataFactory WorkoutMetadataFactory
+@inject IAthleteSession AthleteSession
 
 <PageTitle>Generate</PageTitle>
 
@@ -35,9 +36,9 @@
 
 @code {
     private List<PlannedWorkout>? Workouts { get; set; }
-    private bool CanDownload => Workouts is { Count: > 0 };
+    private bool CanDownload => Workouts is { Count: > 0 } && Athlete is not null;
     private Planning? _planning;
-    private Athlete? Athlete => _planning?.Athlete;
+    private Athlete? Athlete { get; set; }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -51,6 +52,7 @@
                 .ToList();
         }
 
+        Athlete = await AthleteSession.GetAndSetAsync();
         StateHasChanged();
     }
 

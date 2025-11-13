@@ -68,7 +68,14 @@
         var weekNumber = _planning.GetWeekNumber(args.ev.Date);
 
         var plannedWorkout = _planning.Workouts.FirstOrDefault(w => w.Id == args.ev.Id);
-        plannedWorkout!.WeekNumber = weekNumber;
+
+        if (plannedWorkout is null)
+        {
+            Snackbar.Add($"Workout with ID {args.ev.Id} not found in planning.", Severity.Error);
+            return;
+        }
+
+        plannedWorkout.WeekNumber = weekNumber;
         plannedWorkout.Date = args.ev.Date;
 
         await localStorage.SetItemAsync(Constants.PlanningKey, _planning);

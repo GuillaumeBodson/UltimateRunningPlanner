@@ -13,14 +13,10 @@ public class WorkoutDetails
     {
         get
         {
-            try
-            {
-                return DetailsCollection?.SingleOrDefault();
-            }
-            catch(InvalidOperationException)
-            {
+            if (DetailsCollection == null || DetailsCollection.Count != 1)
                 return null;
-            }
+
+            return DetailsCollection.SingleOrDefault();
         }
     }
 

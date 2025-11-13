@@ -65,6 +65,7 @@
         if (firstRender)
         {
             _athlete = await AthleteSession.GetAndSetAsync();
+
             StateHasChanged();
         }
     }
@@ -85,6 +86,8 @@
         try
         {
             var planning = PlanningBuilder.BuildPlanning(_startDateTime!.Value, _workouts!, _athlete!, _trainingTemplates);
+
+            await localStorage.SetItemAsync("planning", planning);
 
             PlanningLoaderService.LoadPlanning(planning);
 

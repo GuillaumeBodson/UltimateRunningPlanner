@@ -9,16 +9,7 @@ public static class WorkoutMapper
 {
     public static WorkoutDto ToWorkoutDto(this CustomWorkoutModel model, int weekNumber, Athlete athlete, int id)
     {
-        var pace = model.RunType switch
-        {
-            RunType.Easy => athlete.EasyPace,
-            RunType.LongRun => athlete.MarathonPace,
-            RunType.Tempo => athlete.SemiMarathonPace,
-            RunType.Intervals => athlete.MasPace,
-            RunType.Recovery => athlete.EasyPace,
-            RunType.Steady => athlete.SemiMarathonPace,
-            _ => athlete.EasyPace
-        };
+        var (pace, paceType) = GetPaceMapping(model.RunType, athlete);
 
         var details = model.Repetitions > 0 ? new WorkoutDetailsDto
         {
@@ -26,16 +17,7 @@ public static class WorkoutMapper
             EffortDuration = (int)model.RunDuration,
             RecoveryDuration = (int)model.CoolDownDuration,
             Pace = pace.ToMeterPerSeconds(),
-            PaceType = model.RunType switch
-            {
-                RunType.Easy => PaceType.EasyPace,
-                RunType.LongRun => PaceType.MarathonPace,
-                RunType.Tempo => PaceType.SemiMarathonPace,
-                RunType.Intervals => PaceType.MasPace,
-                RunType.Recovery => PaceType.EasyPace,
-                RunType.Steady => PaceType.SemiMarathonPace,
-                _ => PaceType.EasyPace
-            }
+            PaceType = paceType
         } : null;
         return new WorkoutDto
         {
@@ -44,6 +26,20 @@ public static class WorkoutMapper
             TotalDuration = model.TotalDuration,
             DetailsCollection = details != null ? [details] : null,
             Description = model.Description,
+        };
+    }
+
+    private static (Pace pace, PaceType paceType) GetPaceMapping(RunType runType, Athlete athlete)
+    {
+        return runType switch
+        {
+            RunType.Easy => (athlete.EasyPace, PaceType.EasyPace),
+            RunType.LongRun => (athlete.MarathonPace, PaceType.MarathonPace),
+            RunType.Tempo => (athlete.SemiMarathonPace, PaceType.SemiMarathonPace),
+            RunType.Intervals => (athlete.MasPace, PaceType.MasPace),
+            RunType.Recovery => (athlete.EasyPace, PaceType.EasyPace),
+            RunType.Steady => (athlete.SemiMarathonPace, PaceType.SemiMarathonPace),
+            _ => (athlete.EasyPace, PaceType.EasyPace)
         };
     }
 
@@ -80,6 +76,7 @@ public static class WorkoutMapper
 
         return result;
     }
+
 
     public static List<CustomWorkout> ToCustomWorkouts(this IEnumerable<PlannedWorkout> workouts)
         => workouts.Select(ToCustomWorkout).ToList();
@@ -148,7 +145,7 @@ public static class WorkoutMapper
                 {
                     Repetitions = int.Parse(repetitionString[0].Trim()),
                     Details = garminDetailsInner,
-                    RecoveryDuration = int.Parse(detailsSplit[1])
+                    RecoveryDuration = int.Parse(detailsSplit[1].TrimEnd(')'))
                 };
             }
             else
@@ -178,16 +175,7 @@ public static class WorkoutMapper
                 EffortDuration = detail.EffortDuration,
                 RecoveryDuration = detail.RecoveryDuration,
                 PaceType = detail.PaceType,
-                Pace = detail.PaceType switch
-                {
-                    PaceType.MasPace => athlete.MasPace,
-                    PaceType.FiveKPace => athlete.FiveKPace,
-                    PaceType.TenKPace => athlete.TenKPace,
-                    PaceType.SemiMarathonPace => athlete.SemiMarathonPace,
-                    PaceType.MarathonPace => athlete.MarathonPace,
-                    PaceType.EasyPace => athlete.EasyPace,
-                    _ => athlete.EasyPace
-                }
+                Pace = GetPaceForPaceType(detail.PaceType, athlete)
             };
             if (detail.Details != null)
             {
@@ -199,22 +187,27 @@ public static class WorkoutMapper
                         EffortDuration = detail.Details.EffortDuration,
                         RecoveryDuration = detail.Details.RecoveryDuration,
                         PaceType = detail.Details.PaceType,
-                        Pace = detail.Details.PaceType switch
-                        {
-                            PaceType.MasPace => athlete.MasPace,
-                            PaceType.FiveKPace => athlete.FiveKPace,
-                            PaceType.TenKPace => athlete.TenKPace,
-                            PaceType.SemiMarathonPace => athlete.SemiMarathonPace,
-                            PaceType.MarathonPace => athlete.MarathonPace,
-                            PaceType.EasyPace => athlete.EasyPace,
-                            _ => athlete.EasyPace
-                        }
+                        Pace = GetPaceForPaceType(detail.Details.PaceType, athlete)
                     }
                 };
             }
             result.Add(workoutDetail);
         }
         return result;
+    }
+
+    private static Pace GetPaceForPaceType(PaceType type, Athlete athlete)
+    {
+        return type switch
+        {
+            PaceType.MasPace => athlete.MasPace,
+            PaceType.FiveKPace => athlete.FiveKPace,
+            PaceType.TenKPace => athlete.TenKPace,
+            PaceType.SemiMarathonPace => athlete.SemiMarathonPace,
+            PaceType.MarathonPace => athlete.MarathonPace,
+            PaceType.EasyPace => athlete.EasyPace,
+            _ => athlete.EasyPace
+        };
     }
 }
 

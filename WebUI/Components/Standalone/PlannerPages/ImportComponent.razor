@@ -90,14 +90,12 @@
             var workouts = await PlanningLoaderService.ReadCustomWorkoutsAsync(stream)
                 ?? throw new InvalidOperationException("No workouts found in the imported file.");
 
-            var count = workouts.Count;
-
             if (workouts.Count > 0 && WorkoutLoaded.HasDelegate)
             {
                 await WorkoutLoaded.InvokeAsync((DateOnly.FromDateTime(_startDateTime.Value), workouts));
             }
 
-            _lastImportSummary = $"Imported {count} workouts from “{file.Name}”.";
+            _lastImportSummary = $"Imported {workouts.Count} workouts from “{file.Name}”.";
             Snackbar.Add(_lastImportSummary, Severity.Success);
         }
         catch (Exception ex)

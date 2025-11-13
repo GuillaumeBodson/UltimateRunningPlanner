@@ -10,21 +10,17 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
     {
         get
         {
-            try
-            {
-                return DetailsCollection?.SingleOrDefault();
-            }
-            catch (InvalidOperationException)
-            {
+            if (DetailsCollection == null || DetailsCollection.Count != 1)
                 return null;
-            }
+
+            return DetailsCollection[0];
         }
     }
 
     public List<WorkoutDetails>? DetailsCollection { get; set; } = null;
 
 
-    public bool IsEmpty => !((Details?.Repetitions ?? DetailsCollection?.Count) > 0);
+    public bool IsEmpty => (DetailsCollection?.Count ?? 0) == 0;
 
     public TimeSpan WarmUp { get; set; }
 
@@ -147,13 +143,13 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
                 List<string> subParts = new();
                 foreach (var subDetail in detail.DetailsCollection!)
                 {
-                    subParts.Add($"{detail.Repetitions} x {subDetail.Repetitions} x {subDetail.EffortDuration} @{FormatPace()} min/km");
+                    subParts.Add($"{detail.Repetitions} x {subDetail.Repetitions} x {subDetail.EffortDuration} @{subDetail.Pace} min/km");
                 }
                 parts.Add(string.Join(", ", subParts));
             }
             else
             {
-                parts.Add($"{detail.Repetitions} x {detail.EffortDuration} @{FormatPace()} min/km");
+                parts.Add($"{detail.Repetitions} x {detail.EffortDuration} @{detail.Pace} min/km");
             }
         }
         return string.Join(", ", parts);
