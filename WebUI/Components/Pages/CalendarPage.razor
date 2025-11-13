@@ -35,12 +35,14 @@
     public ObservableCollection<CalendarEvent>? CalendarEvents { get; set; } = [];
     public ObservableCollection<WeekRecap> WeekRecaps { get; set; } = [];
     private Planning? _planning;
+    private Athlete? _athlete;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
 
         _planning = await PlanningSession.GetAsync();
+        _athlete = await AthleteSession.GetAsync();
 
         if (_planning is null)
         {
@@ -61,6 +63,7 @@
             Snackbar.Add("No planning loaded. Cannot save workout changes.", Severity.Error);
             return;
         }
+
         var weekNumber = _planning.GetWeekNumber(args.ev.Date);
 
         var plannedWorkout = _planning.Workouts.FirstOrDefault(w => w.Id == args.ev.Id);
@@ -88,6 +91,12 @@
                 return null;
             }
 
+            if (_athlete is null)
+            {
+                Snackbar.Add("No athlete data found. Cannot create workout.", Severity.Error);
+                return null;
+            }
+
             int weekNumber;
             try
             {
@@ -107,9 +116,9 @@
             var id = NextIdForWeek(weekNumber);
 
             // Map + add to BaseWorkouts and Workouts
-            var workout = model.ToWorkoutDto(weekNumber, _planning.Athlete, id);
+            var workout = model.ToWorkoutDto(weekNumber, _athlete, id);
 
-            var planned = WorkoutCreator.Create(workout, _planning.Athlete, date);
+            var planned = WorkoutCreator.Create(workout, _athlete, date);
             _planning.Workouts.Add(planned);
 
             // Persist planning

@@ -30,8 +30,6 @@ public class Planning
             };
         }).ToList();
 
-    public required Athlete Athlete { get; set; }
-
     public int GetWeekNumber(DateOnly date)
     {
         if (date < StartDate)

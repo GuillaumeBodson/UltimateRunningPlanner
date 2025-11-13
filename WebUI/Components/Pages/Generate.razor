@@ -70,7 +70,7 @@
                 await using var entryStream = entry.Open();
 
                 var customWorkout = workout.ToCustomWorkout();
-                var metadata = WorkoutMetadataFactory.Create(workout, _planning!.Athlete, workoutPreferences);
+                var metadata = WorkoutMetadataFactory.Create(workout, Athlete, workoutPreferences);
                 Workout garminWorkout = WorkoutGeneratorService.GenerateWorkoutsFromPlanning(customWorkout, metadata);
                 await JsonSerializer.SerializeAsync(entryStream, garminWorkout);
             }

@@ -20,7 +20,6 @@ public class PlanningBuilder : IPlanningBuilder
         var planning = new Planning
         {
             StartDate = startDate.GetMonday(),
-            Athlete = athlete
         };
 
         var mondayOfWeek = planning.StartDate;
