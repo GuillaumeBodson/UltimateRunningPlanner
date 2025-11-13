@@ -28,7 +28,7 @@ public class Planning
                 Text = [$"Week {g.Key}", $"{g.Count()} workouts", $"{g.Sum(w => w.EstimatedDistance) / 1000.0:0.##} km"],
                 CalendarEvents = g.Select(w => w.ToCalendarEvent()).ToList()
             };
-        }).ToList();   
+        }).ToList();
 
     public int GetWeekNumber(DateOnly date)
     {
