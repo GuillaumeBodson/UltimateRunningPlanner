@@ -12,7 +12,6 @@
 @using WebUI.Services
 @using WebUI.Services.Interfaces
 @using static WebUI.Models.Planning.RemovalResult
-@inject Blazored.LocalStorage.ILocalStorageService localStorage
 @inject ISession<Athlete> AthleteSession
 @inject IDialogService Dialog
 @inject IPlannedWorkoutFactory WorkoutCreator
@@ -41,7 +40,7 @@
     {
         if (!firstRender) return;
 
-        _planning = PlanningSession.Current;
+        _planning = await PlanningSession.GetAsync();
 
         if (_planning is null)
         {
@@ -75,7 +74,7 @@
         plannedWorkout.WeekNumber = weekNumber;
         plannedWorkout.Date = args.ev.Date;
 
-        await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+        await PlanningSession.SetAsync(_planning);
     }
 
     private async Task<CalendarEvent?> CreateEventAsync(DateOnly date)
@@ -114,7 +113,7 @@
             _planning.Workouts.Add(planned);
 
             // Persist planning
-            await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+            await PlanningSession.SetAsync(_planning);
 
             StateHasChanged();
             Snackbar.Add("Event created", Severity.Success);
@@ -185,7 +184,7 @@
         }
 
         // Persist updated planning
-        await localStorage.SetItemAsync(Constants.PlanningKey, _planning);
+        await PlanningSession.SetAsync(_planning);
         // Update UI state
         CalendarEvents.Remove(CalendarEvents.First(e => e.Id == id));
 

@@ -70,7 +70,7 @@
             </MudGrid>
         </MudPaper>
     }
-    else if (!IsLoading)
+    else if (!IsLoading || WeeklyData.Count == 0)
     {
         <MudAlert Severity="Severity.Info" Class="my-4">
             <MudText>No planning data found. Please import your training data first.</MudText>
@@ -78,7 +78,7 @@
     }
 </MudContainer>
 
-@code {
+    @code {
     private bool IsLoading = true;
     private List<WeeklyAnalyticsData> WeeklyData = new();
     private List<ChartSeries> Series = new();
@@ -118,7 +118,7 @@
 
     private async Task LoadStatisticsData()
     {
-        var planning = PlanningSession.Current;
+        var planning = await PlanningSession.GetAsync();
 
         if (planning?.Workouts?.Any() != true)
         {
