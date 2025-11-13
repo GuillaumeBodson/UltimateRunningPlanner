@@ -1,4 +1,7 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Blazored.LocalStorage;
+using Microsoft.Extensions.Options;
+using System.Text.Json.Serialization.Metadata;
+using WebUI.Converters;
 using WebUI.Models;
 using WebUI.Services;
 using WebUI.Services.Interfaces;
@@ -29,6 +32,32 @@ public static class ServiceRegistrationExtension
         services.AddScoped<ISession<Athlete>, AthleteSession>();
         services.AddScoped<ISession<Planning>, PlanningSession>();
 
+        return services;
+    }
+
+    public static IServiceCollection ConfigureLocalStorage(this IServiceCollection services)
+    {
+        services.AddBlazoredLocalStorage(c =>
+        {
+            c.JsonSerializerOptions.WriteIndented = false;
+            c.JsonSerializerOptions.Converters.Add(new PaceJsonConverter());
+            c.JsonSerializerOptions.Converters.Add(new PlannedWorkoutJsonConverter());
+            c.JsonSerializerOptions.Converters.Add(new TrainingTemplateCollectionJsonConverter());
+            c.JsonSerializerOptions.Converters.Add(new TrainingTemplateConverter());
+            c.JsonSerializerOptions.TypeInfoResolver = new DefaultJsonTypeInfoResolver
+            {
+                Modifiers =
+           {
+                 static typeInfo =>
+                 {
+                       if (typeInfo.Type == typeof(IWorkoutPreferences))
+                       {
+                             typeInfo.CreateObject = () => new WorkoutPreferences();
+                       }
+                 }
+           }
+            };
+        });
         return services;
     }
 }

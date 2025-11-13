@@ -1,4 +1,5 @@
 ﻿using GarminRunerz.Workout.Services.Models;
+using System.Text.Json.Serialization;
 
 namespace WebUI.Models;
 
@@ -53,6 +54,11 @@ public sealed class WorkoutPreferences : IWorkoutPreferences
         }
     }
 
+    // for json serialization
+    public WorkoutPreferences()
+    {
+        
+    }
     public WorkoutPreferences(
         TimeSpan? warmUpDuration,
         TimeSpan? coolDownDuration)
