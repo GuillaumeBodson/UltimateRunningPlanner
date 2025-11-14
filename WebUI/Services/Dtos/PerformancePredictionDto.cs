@@ -1,6 +1,4 @@
-﻿using WebUI.Models;
-
-namespace WebUI.Services.Dtos;
+﻿namespace WebUI.Services.Dtos;
 
 public readonly record struct PerformancePredictionDto
 {

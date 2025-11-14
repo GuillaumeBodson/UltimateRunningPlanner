@@ -13,8 +13,8 @@ public readonly record struct RiegelParameters(double A, double B);
 
 public record PerformancesPrediction
 {
-    public List<SimplePerformancePrediction> Predictions { get; set; } = [];
-    public RiegelParameters RiegelParameters { get; set; }
+    public List<SimplePerformancePrediction> Predictions { get; init; } = [];
+    public RiegelParameters RiegelParameters { get; init; }
 }
 
 public readonly record struct SimplePerformancePrediction

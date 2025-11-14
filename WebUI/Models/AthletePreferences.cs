@@ -1,5 +1,4 @@
 ﻿using GarminRunerz.Workout.Services.Models;
-using System.Text.Json.Serialization;
 
 namespace WebUI.Models;
 

@@ -1,5 +1,4 @@
-﻿using System.Runtime.CompilerServices;
-using WebUI.Models;
+﻿using WebUI.Models;
 using WebUI.Services.Dtos;
 
 namespace WebUI.Mappers;
@@ -13,7 +12,7 @@ public static class PerformanceMapper
             Distance = dto.Distance,
             Time = dto.Time,
             RiegelParameters = new RiegelParameters(dto.RiegelParameters.A, dto.RiegelParameters.B),
-            Pace = new Pace((int)Math.Round(dto.Time.TotalSeconds / (dto.Distance / 1000)))
+            Pace = new Pace((int)Math.Round(dto.Time.TotalSeconds / (dto.Distance / 1000d)))
         };
     }
 
@@ -22,7 +21,7 @@ public static class PerformanceMapper
         return new SimplePerformancePrediction
         {
             Distance = dto.Distance,
-            Pace = new Pace((int)Math.Round(dto.Time.TotalSeconds / (dto.Distance / 1000)))
+            Pace = new Pace((int)Math.Round(dto.Time.TotalSeconds / (dto.Distance / 1000d)))
         };
     }
 
@@ -37,7 +36,7 @@ public static class PerformanceMapper
     {
         return new MultiplePerformancesPrediction
         {
-            Predictions = dto.Predictions.Select(p => p.ToSimplePerformancePrediction()).ToList(),
+            Predictions = dto.Predictions.Select(p => p.ToSimplePerformancePrediction()).ToArray(),
             RiegelParameters = new RiegelParameters(dto.RiegelParameters.A, dto.RiegelParameters.B)
         };
     }

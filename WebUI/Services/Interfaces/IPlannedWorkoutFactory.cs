@@ -1,4 +1,3 @@
-using GarminRunerz.Workout.Services.Models;
 using WebUI.Models;
 using WebUI.Models.Workouts;
 using WebUI.Services.Dtos;

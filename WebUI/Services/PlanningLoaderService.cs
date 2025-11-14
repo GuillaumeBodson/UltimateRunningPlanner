@@ -1,4 +1,3 @@
-using GarminRunerz.Workout.Services.Models;
 using ToolBox.File;
 using ToolBox.File.Core;
 using WebUI.Mappers;

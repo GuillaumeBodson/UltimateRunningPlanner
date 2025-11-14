@@ -16,7 +16,8 @@ internal sealed class PaceCalculatorClient(HttpClient http) : IPaceCalculatorCli
         using var response = await http.PostAsJsonAsync("/estimate", request, ct).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<PerformancePredictionDto>(cancellationToken: ct).ConfigureAwait(false);
+        var result = await response.Content.ReadFromJsonAsync<PerformancePredictionDto?>(cancellationToken: ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Failed to deserialize response to PerformancePredictionDto.");
         return result;
     }
 
@@ -30,11 +31,12 @@ internal sealed class PaceCalculatorClient(HttpClient http) : IPaceCalculatorCli
         using var response = await http.PostAsJsonAsync("/estimate-with-r", request, ct).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<PerformancePredictionDto>(cancellationToken: ct).ConfigureAwait(false);
+        var result = await response.Content.ReadFromJsonAsync<PerformancePredictionDto?>(cancellationToken: ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Failed to deserialize response to PerformancePredictionDto.");
         return result;
     }
 
-    public async Task<MultiplePerformancesPredictionDto> EstimateMultipleAsync(List<int> distances, IReadOnlyList<PerformanceDto> performances, CancellationToken ct = default)
+    public async Task<MultiplePerformancesPredictionDto> EstimateMultipleAsync(IReadOnlyList<int> distances, IReadOnlyList<PerformanceDto> performances, CancellationToken ct = default)
     {
         var request = new
         {
@@ -43,7 +45,9 @@ internal sealed class PaceCalculatorClient(HttpClient http) : IPaceCalculatorCli
         };
         using var response = await http.PostAsJsonAsync("/estimate-multiple", request, ct).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
-        var result = await response.Content.ReadFromJsonAsync<MultiplePerformancesPredictionDto>(cancellationToken: ct).ConfigureAwait(false);
+        var result = await response.Content.ReadFromJsonAsync<MultiplePerformancesPredictionDto>(cancellationToken: ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Failed to deserialize response to MultiplePerformancesPredictionDto.");
+
         return result;
     }
 }
