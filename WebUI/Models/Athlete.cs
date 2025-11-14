@@ -9,6 +9,7 @@ public class Athlete
     public Pace FiveKPace { get; set; }
     public Pace MasPace { get; set; }
 
+    public RiegelParameters? EnduranceIndex { get; set; }
     public List<Performance> Performances { get; set; } = [];
     public HashSet<TrainingTemplate> TrainingTemplates { get; set; } = [];
     public AthletePreferences AthletePreferences { get; set; } = new AthletePreferences();

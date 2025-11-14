@@ -5,10 +5,8 @@ namespace WebUI.Services;
 
 internal sealed class PaceCalculatorClient(HttpClient http) : IPaceCalculatorClient
 {
-    // Preferred: requires API to expose POST /estimate accepting a request body.
-    public async Task<double> EstimateAsync(double distanceMeters, IReadOnlyList<PerformanceDto> performances, CancellationToken ct = default)
+    public async Task<PerformancePredictionDto> EstimateAsync(double distanceMeters, IReadOnlyList<PerformanceDto> performances, CancellationToken ct = default)
     {
-        // If your API keeps GET-only, you can forward to EstimateViaGetAsync here instead.
         var request = new
         {
             distanceMeters,
@@ -18,7 +16,38 @@ internal sealed class PaceCalculatorClient(HttpClient http) : IPaceCalculatorCli
         using var response = await http.PostAsJsonAsync("/estimate", request, ct).ConfigureAwait(false);
         response.EnsureSuccessStatusCode();
 
-        var result = await response.Content.ReadFromJsonAsync<double>(cancellationToken: ct).ConfigureAwait(false);
+        var result = await response.Content.ReadFromJsonAsync<PerformancePredictionDto?>(cancellationToken: ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Failed to deserialize response to PerformancePredictionDto.");
+        return result;
+    }
+
+    public async Task<PerformancePredictionDto> EstimateWithRParameterAsync(double distanceMeters, double rParameter, CancellationToken ct = default)
+    {
+        var request = new
+        {
+            distanceMeters,
+            rParameter
+        };
+        using var response = await http.PostAsJsonAsync("/estimate-with-r", request, ct).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+
+        var result = await response.Content.ReadFromJsonAsync<PerformancePredictionDto?>(cancellationToken: ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Failed to deserialize response to PerformancePredictionDto.");
+        return result;
+    }
+
+    public async Task<MultiplePerformancesPredictionDto> EstimateMultipleAsync(IReadOnlyList<int> distances, IReadOnlyList<PerformanceDto> performances, CancellationToken ct = default)
+    {
+        var request = new
+        {
+            distances,
+            performances
+        };
+        using var response = await http.PostAsJsonAsync("/estimate-multiple", request, ct).ConfigureAwait(false);
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<MultiplePerformancesPredictionDto>(cancellationToken: ct).ConfigureAwait(false)
+            ?? throw new InvalidOperationException("Failed to deserialize response to MultiplePerformancesPredictionDto.");
+
         return result;
     }
 }

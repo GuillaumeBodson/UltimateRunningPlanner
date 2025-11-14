@@ -1,6 +1,5 @@
 ﻿using GarminRunerz.Workout.Services.Models;
 using MudBlazor;
-using System.Globalization;
 using System.MudPlanner;
 using System.Text.Json.Serialization;
 using WebUI.Converters;

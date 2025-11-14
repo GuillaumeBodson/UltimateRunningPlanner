@@ -1,4 +1,3 @@
-using WebUI.Models;
 using WebUI.Services.Dtos;
 
 namespace WebUI.Services.Interfaces;

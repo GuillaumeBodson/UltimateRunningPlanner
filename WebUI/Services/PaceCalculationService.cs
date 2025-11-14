@@ -1,4 +1,5 @@
-﻿using WebUI.Models;
+﻿using WebUI.Mappers;
+using WebUI.Models;
 using WebUI.Services.Interfaces;
 
 namespace WebUI.Services;
@@ -13,40 +14,20 @@ public class PaceCalculationService : IPaceCalculationService
         _paceCalculatorClient = paceCalculatorClient;
     }
 
-    public async Task<Pace> CalculatePaceAsync(double distance, params Performance[] performances)
+    public async Task<PerformancePrediction> CalculatePaceAsync(double distance, params Performance[] performances)
     {
         var result = await _paceCalculatorClient.EstimateAsync(distance, [.. performances.Select(x => x.ToDto())]);
-        var pace = new Pace((int)Math.Round(result));
-        return pace;
+
+        var prediction = result.ToPerformancePrediction();
+        return prediction;
     }
-
-    public async Task<Dictionary<int, Pace>> CalculatePacesForStandardDistancesAsync(params Performance[] performances)
+    public async Task<MultiplePerformancesPrediction> CalculatePacesForStandardDistancesAsync(params Performance[] performances)
     {
-        var paces = new Dictionary<int, Pace>();
         var missingDistances = distances.Where(d => !performances.Select(p => p.DistanceMeters).Contains(d)).ToList();
-        var apiCalls = new Task<Pace>[missingDistances.Count];
-        int j = 0;
-        for (int i = 0; i < distances.Length; i++)
-        {
-            int distance = distances[i];
-            if (performances.FirstOrDefault(p => Math.Abs(p.DistanceMeters - distance) < 500) is Performance performance)
-            {
-                var secondsPerKm = performance.TimeSeconds / ((double)performance.DistanceMeters / 1000);
-                paces[distance] = new Pace((int)Math.Round(secondsPerKm));
-            }
-            else
-            {
-                apiCalls[j] = CalculatePaceAsync(distance, performances);
-                j++;
-            }
-        }
+        var result = await _paceCalculatorClient.EstimateMultipleAsync([.. missingDistances], [.. performances.Select(x => x.ToDto())]);
 
-        var results = await Task.WhenAll(apiCalls);
-        for (int i = 0; i < missingDistances.Count; i++)
-        {
-            int distance = missingDistances[i];
-            paces[distance] = results[i];
-        }
-        return paces;
+        var predictions = result.ToMultiplePerformancesPrediction();
+
+        return predictions;
     }
 }

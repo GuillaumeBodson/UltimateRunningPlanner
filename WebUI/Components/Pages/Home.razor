@@ -127,29 +127,30 @@
         athleteCreationSetter(_athleteCreation, pace.ToMinutesDotSeconds());
     }
 
-    private void OnPaceFetched(Dictionary<int, Pace> args)
+    private void OnPaceFetched(MultiplePerformancesPrediction args)
     {
-        foreach (var paceDistance in args)
+        _athlete.EnduranceIndex = args.RiegelParameters;
+        foreach (var prediction in args.Predictions)
         {
-            switch (paceDistance.Key)
+            switch (prediction.Distance)
             {
                 case 2_000:
-                    UpdatePace((a, p) => a.MasPace = p, (ac, v) => ac.MasPace = v, paceDistance.Value);
+                    UpdatePace((a, p) => a.MasPace = p, (ac, v) => ac.MasPace = v, prediction.Pace);
                     break;
                 case 5_000:
-                    UpdatePace((a, p) => a.FiveKPace = p, (ac, v) => ac.FiveKPace = v, paceDistance.Value);
+                    UpdatePace((a, p) => a.FiveKPace = p, (ac, v) => ac.FiveKPace = v, prediction.Pace);
                     break;
                 case 10_000:
-                    UpdatePace((a, p) => a.TenKPace = p, (ac, v) => ac.TenKPace = v, paceDistance.Value);
+                    UpdatePace((a, p) => a.TenKPace = p, (ac, v) => ac.TenKPace = v, prediction.Pace);
                     break;
                 case 21_097:
-                    UpdatePace((a, p) => a.SemiMarathonPace = p, (ac, v) => ac.SemiMarathonPace = v, paceDistance.Value);
+                    UpdatePace((a, p) => a.SemiMarathonPace = p, (ac, v) => ac.SemiMarathonPace = v, prediction.Pace);
                     break;
                 case 42_195:
-                    UpdatePace((a, p) => a.MarathonPace = p, (ac, v) => ac.MarathonPace = v, paceDistance.Value);
+                    UpdatePace((a, p) => a.MarathonPace = p, (ac, v) => ac.MarathonPace = v, prediction.Pace);
                     break;
                 case 500_000:
-                    UpdatePace((a, p) => a.EasyPace = p, (ac, v) => ac.EasyPace = v, paceDistance.Value);
+                    UpdatePace((a, p) => a.EasyPace = p, (ac, v) => ac.EasyPace = v, prediction.Pace);
                     break;
             }
         }
