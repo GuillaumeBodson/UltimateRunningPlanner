@@ -23,8 +23,4 @@
 
 	</ItemGroup>
 
-	<ItemGroup>
-	  <ProjectReference Include="..\..\Toolbox\ToolBox.API\ToolBox.EntityFramework.csproj" />
-	</ItemGroup>
-
 </Project>
