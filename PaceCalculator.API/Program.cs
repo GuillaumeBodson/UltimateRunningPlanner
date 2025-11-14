@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using RunGuesser;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,8 +22,8 @@ app.MapPost("/estimate", ([FromBody]EstimationRequest request) =>
     try
     {
         var performancesTuples = request.Performances.Select(x => x.ToTuple()).ToList();
-        var result = RunGuesser.RiegelModel.Predict(request.DistanceMeters, performancesTuples);
-        return Results.Ok(result.PaceSecondsPerKm);
+        var result = RiegelModel.Predict(request.DistanceMeters, performancesTuples);
+        return Results.Ok(result);
     }
     catch (ArgumentException ex)
     {
@@ -34,23 +35,53 @@ app.MapPost("/estimate", ([FromBody]EstimationRequest request) =>
     }
 }).WithDescription("Estimate pace for a given distance based on previous performances using Riegel's formula.")
   .WithName("EstimateRunTime")
-  .Produces<double>(StatusCodes.Status200OK)
+  .Produces<PerformancePrediction>(StatusCodes.Status200OK)
+  .Produces<string>(StatusCodes.Status400BadRequest)
+  .Produces<string>(StatusCodes.Status500InternalServerError);
+
+app.MapPost("/estimate-with-r", ([FromBody] EstimationWithRParameterRequest request) =>
+{
+    try
+    {
+        var result = RiegelModel.Predict(request.DistanceMeters, request.RParameter);
+        return Results.Ok(result);
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return Results.InternalServerError(ex.Message);
+    }
+
+}).WithDescription("Estimate pace for a given distance based on a previous performance and a specified Riegel parameter.")
+  .WithName("EstimateRunTimeWithRParameter")
+  .Produces<PerformancePrediction>(StatusCodes.Status200OK)
+  .Produces<string>(StatusCodes.Status400BadRequest)
+  .Produces<string>(StatusCodes.Status500InternalServerError);
+
+app.MapPost("/estimate-mulitple", ([FromBody] MultipleEstimationRequest request) =>
+{
+    try
+    {
+        var performancesTuples = request.Performances.Select(x => x.ToTuple()).ToList();
+        var results = RiegelModel.Predict(request.Distances.Select(d => (double)d).ToList(), performancesTuples);
+
+        return Results.Ok(results);
+    }
+    catch (ArgumentException ex)
+    {
+        return Results.BadRequest(ex.Message);
+    }
+    catch (Exception ex)
+    {
+        return Results.InternalServerError(ex.Message);
+    }
+}).WithDescription("Estimate paces for multiple distances based on previous performances using Riegel's formula.")
+  .WithName("EstimateMultipleRunTimes")
+  .Produces<MultiplePerformancesPrediction>(StatusCodes.Status200OK)
   .Produces<string>(StatusCodes.Status400BadRequest)
   .Produces<string>(StatusCodes.Status500InternalServerError);
 
 app.Run();
-
-
-internal record Performance
-{
-    public double DistanceMeters { get; init; }
-    public double TimeSeconds { get; init; }
-
-    public (double DistanceMeters, double TimeSeconds) ToTuple() => (DistanceMeters, TimeSeconds);
-}
-
-internal record EstimationRequest 
-{ 
-    public double DistanceMeters { get; init; }
-    public List<Performance> Performances { get; init; } = [];
-}
