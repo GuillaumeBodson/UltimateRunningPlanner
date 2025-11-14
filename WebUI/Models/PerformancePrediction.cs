@@ -1,6 +1,6 @@
 ﻿namespace WebUI.Models;
 
-public readonly record struct PerformancePrediction
+public readonly record struct PerformancePrediction : IPerformance
 {
     public int Distance { get; init; }
     public TimeSpan Time { get; init; }
@@ -17,7 +17,7 @@ public record PerformancesPrediction
     public RiegelParameters RiegelParameters { get; init; }
 }
 
-public readonly record struct SimplePerformancePrediction
+public readonly record struct SimplePerformancePrediction : IPerformance
 {
     public int Distance { get; init; }
     public Pace Pace { get; init; }

@@ -23,7 +23,7 @@ public class PaceCalculationService : IPaceCalculationService
     }
     public async Task<MultiplePerformancesPrediction> CalculatePacesForStandardDistancesAsync(params Performance[] performances)
     {
-        var missingDistances = distances.Where(d => !performances.Select(p => p.DistanceMeters).Contains(d)).ToList();
+        var missingDistances = distances.Where(d => !performances.Select(p => p.Distance).Contains(d)).ToList();
         var result = await _paceCalculatorClient.EstimateMultipleAsync([.. missingDistances], [.. performances.Select(x => x.ToDto())]);
 
         var predictions = result.ToMultiplePerformancesPrediction();
