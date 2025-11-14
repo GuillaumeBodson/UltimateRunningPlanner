@@ -61,7 +61,7 @@ app.MapPost("/estimate-with-r", ([FromBody] EstimationWithRParameterRequest requ
   .Produces<string>(StatusCodes.Status400BadRequest)
   .Produces<string>(StatusCodes.Status500InternalServerError);
 
-app.MapPost("/estimate-mulitple", ([FromBody] MultipleEstimationRequest request) =>
+app.MapPost("/estimate-multiple", ([FromBody] MultipleEstimationRequest request) =>
 {
     try
     {
