@@ -27,7 +27,7 @@ public static class PerformanceMapper
 
     public static PerformanceDto ToDto(this Performance performance) => new()
     {
-        DistanceMeters = performance.DistanceMeters,
+        DistanceMeters = performance.Distance,
         TimeSeconds = performance.TimeSeconds,
         //ElevationGainMeters = performance.ElevationGainMeters
     };

@@ -20,7 +20,7 @@ public sealed class PlanPromptBuilder : IPlanPromptBuilder
         sb.AppendLine("My background:");
 
         // Simple background derivation (could be enriched from Performances later)
-        var halfPerf = athlete.Performances?.FirstOrDefault(p => p.DistanceMeters is 21097);
+        var halfPerf = athlete.Performances?.FirstOrDefault(p => p.Distance is 21097);
         if (halfPerf is not null)
         {
             sb.AppendLine($"– I recently ran a half marathon in {FormatTime(halfPerf.TimeSeconds)}.");
