@@ -12,7 +12,7 @@ public static class PerformanceMapper
             Distance = dto.Distance,
             Time = dto.Time,
             RiegelParameters = new RiegelParameters(dto.RiegelParameters.A, dto.RiegelParameters.B),
-            Pace =  Pace.FromTimeAndDistance(dto.Time, dto.Distance)
+            Pace = Pace.FromTimeAndDistance(dto.Time, dto.Distance)
         };
     }
 

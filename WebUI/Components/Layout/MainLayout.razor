@@ -19,7 +19,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         Need For Speed
 
-		<MudSwitch Value="IsDarkMode" ValueChanged="OnIsDarkModeChangedAsync" T="bool" Color="Color.Primary" Class="ma-4" T="bool" Label="Toggle Light/Dark Mode" />
+		<MudSwitch Value="IsDarkMode" ValueChanged="OnIsDarkModeChangedAsync" T="bool" Color="Color.Primary" Class="ma-4" Label="Toggle Light/Dark Mode" />
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen">
         <NavMenu />
@@ -44,7 +44,7 @@
 		_drawerOpen = !_drawerOpen;
 	}
 
-	private MudTheme _theme = new();
+	private readonly MudTheme _theme = new();
 	private Athlete? _athlete;
 
 	public bool IsDarkMode
@@ -76,6 +76,6 @@
 	{
 		IsDarkMode = args;
 		if (_athlete != null)
-			await AthleteSession.SetAsync(_athlete!);
+			await AthleteSession.SetAsync(_athlete);
 	}
 }
