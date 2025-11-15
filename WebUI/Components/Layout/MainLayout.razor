@@ -1,7 +1,10 @@
-﻿@inherits LayoutComponentBase
+﻿@using WebUI.Models
+@using WebUI.Services.Interfaces
+@inherits LayoutComponentBase
+@inject ISession<Athlete> AthleteSession
 
 @* Required *@
-<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme" />
+<MudThemeProvider @bind-IsDarkMode="@IsDarkMode" Theme="_theme" />
 <MudPopoverProvider />
 
 @* Needed for dialogs *@
@@ -16,7 +19,7 @@
         <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
         Need For Speed
 
-        <MudSwitch @bind-Value="_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" Label="Toggle Light/Dark Mode"/>
+		<MudSwitch Value="IsDarkMode" ValueChanged="OnIsDarkModeChangedAsync" T="bool" Color="Color.Primary" Class="ma-4" T="bool" Label="Toggle Light/Dark Mode" />
     </MudAppBar>
     <MudDrawer @bind-Open="@_drawerOpen">
         <NavMenu />
@@ -32,13 +35,47 @@
     <span class="dismiss">🗙</span>
 </div>
 @code {
-    bool _drawerOpen = true;
 
-    void DrawerToggle()
-    {
-        _drawerOpen = !_drawerOpen;
-    }
 
-    private MudTheme _theme = new();
-    private bool _isDarkMode;
+	bool _drawerOpen = true;
+
+	void DrawerToggle()
+	{
+		_drawerOpen = !_drawerOpen;
+	}
+
+	private MudTheme _theme = new();
+	private Athlete? _athlete;
+
+	public bool IsDarkMode
+	{
+		get => field;
+		set
+		{
+			field = value;
+			if (_athlete?.AthletePreferences != null)
+			{
+				_athlete.AthletePreferences.IsDarkMode = value;
+			}
+		}
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			_athlete = await AthleteSession.GetAsync();
+			if (_athlete?.AthletePreferences != null)
+			{
+				IsDarkMode = _athlete.AthletePreferences.IsDarkMode;
+			}
+			StateHasChanged();
+		}
+	}
+	private async Task OnIsDarkModeChangedAsync(bool args)
+	{
+		IsDarkMode = args;
+		if (_athlete != null)
+			await AthleteSession.SetAsync(_athlete!);
+	}
 }

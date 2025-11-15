@@ -5,7 +5,7 @@ namespace WebUI.Models;
 public record AthletePreferences
 {
     public int WorkoutPerWeek { get; set; } = 4;
-
+    public bool IsDarkMode { get; set; } = true;
     public Dictionary<RunType, IWorkoutPreferences?> WorkoutPreferences { get; set; } =
      WorkoutPreferenceFactory.CreateDefaults();
 
