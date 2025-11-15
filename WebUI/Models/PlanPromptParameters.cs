@@ -29,14 +29,19 @@ public sealed class PlanPromptParameters
     // Default 21-week marathon structure (matches example)
     public List<PlanPhaseConfig> Phases { get; } =
     [
-        new() { Name = "Base", StartWeek = 1, EndWeek = 6, RunsPerWeek = 4, FocusDescription = "faster speeds are prioritize (MAS and FiveK)" },
+        new() { Name = "Base", StartWeek = 1, EndWeek = 6, RunsPerWeek = 4, FocusDescription = "faster speeds are prioritized (MAS and FiveK)" },
         new() { Name = "Transition", StartWeek = 7, EndWeek = 13, RunsPerWeek = 4, FocusDescription = "alternate 4 & 5 runs/week, transition to slower speed (TenK and Semi-marathon)" },
         new() { Name = "Marathon-specific", StartWeek = 14, EndWeek = 19, RunsPerWeek = 5, FocusDescription = "marathon-specific work" },
-        new() { Name = "Taper", StartWeek = 20, EndWeek = 22, RunsPerWeek = 4, FocusDescription = "reduce volume & sharpen" }
+        new() { Name = "Taper", StartWeek = 20, EndWeek = 21, RunsPerWeek = 4, FocusDescription = "reduce volume & sharpen" }
     ];
 
     public bool IsValid(out string? error)
     {
+        if (StartDate == null || RaceDate == null)
+        {
+            error = "Both start date and race date are required.";
+            return false;
+        }
         if (StartDate >= RaceDate)
         {
             error = "Start date must be before race date.";

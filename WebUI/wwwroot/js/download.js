@@ -19,4 +19,4 @@ export function downloadFileFromBytes(fileName, contentType, base64Data){
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-}; 
+}

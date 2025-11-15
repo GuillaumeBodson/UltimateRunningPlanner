@@ -15,19 +15,19 @@ public sealed class PlanPromptBuilder : IPlanPromptBuilder
 
         var sb = new StringBuilder();
 
-        sb.AppendLine($"I want you to create a full {TotalWeeks(parameters)}-week {(parameters.Distance == RaceDistance.Marathon ? "marathon" : parameters.Distance.ToString().ToLower(CultureInfo.InvariantCulture))} training plan to run a {(parameters.Distance == RaceDistance.Marathon ? "marathon" : parameters.Distance.ToString().ToLower())} at {parameters.GoalTimeOrPaceDescription}.");
+        sb.AppendLine($"I want you to create a full {TotalWeeks(parameters)}-week {(parameters.Distance == RaceDistance.Marathon ? "marathon" : parameters.Distance.ToString().ToLower(CultureInfo.InvariantCulture))} training plan to run a {(parameters.Distance == RaceDistance.Marathon ? "marathon" : parameters.Distance.ToString().ToLower(CultureInfo.InvariantCulture))} at {parameters.GoalTimeOrPaceDescription}.");
         sb.AppendLine();
         sb.AppendLine("My background:");
 
         // Simple background derivation (could be enriched from Performances later)
-        var halfPerf = athlete.Performances?.FirstOrDefault(p => p.Distance is 21097);
+        var halfPerf = athlete.Performances?.FirstOrDefault(p => p.Distance == (int)RaceDistance.HalfMarathon);
         if (halfPerf is not null)
         {
             sb.AppendLine($"– I recently ran a half marathon in {FormatTime(halfPerf.TimeSeconds)}.");
         }
         else
         {
-            sb.AppendLine("– I have recent race performances stored.");
+            sb.AppendLine("– No half marathon performance recorded.");
         }
 
         // Estimate current weekly frequency from templates or performances

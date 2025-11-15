@@ -119,9 +119,17 @@
             _pacesJson = PromptBuilder.BuildPacesJson(_athlete);
             Snackbar.Add("Prompt generated.", Severity.Success);
         }
-        catch (Exception ex)
+        catch (ArgumentException ex)
         {
-            Snackbar.Add("Error generating prompt: " + ex.Message, Severity.Error);
+            Snackbar.Add("Invalid input: " + ex.Message, Severity.Error);
+        }
+        catch (InvalidOperationException ex)
+        {
+            Snackbar.Add("Operation error: " + ex.Message, Severity.Error);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("An unexpected error occurred while generating the prompt.", Severity.Error);
         }
         finally
         {
