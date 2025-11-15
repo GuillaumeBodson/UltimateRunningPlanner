@@ -115,7 +115,7 @@
     }
 
     private static Performance? FindByDistance(IList<Performance> list, int distanceMeters)
-        => list.FirstOrDefault(p => Math.Abs(p.DistanceMeters - distanceMeters) < 0.5);
+        => list.FirstOrDefault(p => Math.Abs(p.Distance - distanceMeters) < 0.5);
 
     private static void RemoveDistance(IList<Performance> list, int distanceMeters)
     {
@@ -130,7 +130,7 @@
         {
             list.Add(new Performance
             {
-                DistanceMeters = distanceMeters,
+                Distance = distanceMeters,
                 TimeSeconds = timeSeconds,
                 ElevationGainMeters = elevationGainMeters
             });

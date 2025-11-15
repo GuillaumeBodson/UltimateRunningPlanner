@@ -12,7 +12,7 @@ public static class PerformanceMapper
             Distance = dto.Distance,
             Time = dto.Time,
             RiegelParameters = new RiegelParameters(dto.RiegelParameters.A, dto.RiegelParameters.B),
-            Pace = new Pace((int)Math.Round(dto.Time.TotalSeconds / (dto.Distance / 1000d)))
+            Pace = Pace.FromTimeAndDistance(dto.Time, dto.Distance)
         };
     }
 
@@ -21,13 +21,13 @@ public static class PerformanceMapper
         return new SimplePerformancePrediction
         {
             Distance = dto.Distance,
-            Pace = new Pace((int)Math.Round(dto.Time.TotalSeconds / (dto.Distance / 1000d)))
+            Pace = Pace.FromTimeAndDistance(dto.Time, dto.Distance)
         };
     }
 
     public static PerformanceDto ToDto(this Performance performance) => new()
     {
-        DistanceMeters = performance.DistanceMeters,
+        DistanceMeters = performance.Distance,
         TimeSeconds = performance.TimeSeconds,
         //ElevationGainMeters = performance.ElevationGainMeters
     };

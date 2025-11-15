@@ -1,0 +1,166 @@
+﻿@page "/plan"
+@using WebUI.Models
+@using WebUI.Services.Interfaces
+@inject ISession<Athlete> AthleteSession
+@inject IPlanPromptBuilder PromptBuilder
+@inject ISnackbar Snackbar
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>Plan Prompt</PageTitle>
+
+<MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
+    <MudText Typo="Typo.h4" Class="mb-4" Color="Color.Primary">Generate Training Plan Prompt</MudText>
+
+    <MudPaper Class="pa-4 mb-4" Elevation="2">
+        <MudStack Spacing="2">
+            <MudSelect @bind-Value="_parameters.Distance" Label="Race Distance" T="RaceDistance" Dense="true">
+                <MudSelectItem Value="RaceDistance.Marathon">Marathon</MudSelectItem>
+                <MudSelectItem Value="RaceDistance.HalfMarathon">Half Marathon</MudSelectItem>
+                <MudSelectItem Value="RaceDistance.TenK">10K</MudSelectItem>
+                <MudSelectItem Value="RaceDistance.FiveK">5K</MudSelectItem>
+            </MudSelect>
+
+            <MudTextField Label="Goal Pace / Time Description" @bind-Value="_parameters.GoalTimeOrPaceDescription" Placeholder="e.g. 4’37 per km pace (≈3h15 goal)" Dense="true" />
+
+            <MudDatePicker Label="Start Date" @bind-Date="_parameters.StartDate" Dense="true" T="DateTime" />
+
+            <MudDatePicker Label="Race Date" @bind-Date="_parameters.RaceDate" Dense="true" T="DateTime" />
+
+            <MudNumericField Label="Max Weekly Km" @bind-Value="_parameters.MaxWeeklyKm" T="int" Min="10" Max="300" Dense="true" />
+
+            @* <MudSwitch @bind-Checked="_parameters.WorkoutsInTimeNotDistance" Color="Color.Primary">Workouts in time (min/sec) instead of distance</MudSwitch> *@
+
+            <MudExpansionPanels Elevation="0">
+                <MudExpansionPanel Text="Phase Configuration">
+                    <MudTable Items="_parameters.Phases" Dense="true" Hover="true">
+                        <HeaderContent>
+                            <MudTh>Name</MudTh>
+                            <MudTh>Weeks</MudTh>
+                            <MudTh>Runs/Week</MudTh>
+                            <MudTh>Focus</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Name">@context.Name</MudTd>
+                            <MudTd DataLabel="Weeks">@context.StartWeek–@context.EndWeek</MudTd>
+                            <MudTd DataLabel="Runs">@context.RunsPerWeek</MudTd>
+                            <MudTd DataLabel="Focus">@context.FocusDescription</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudExpansionPanel>
+            </MudExpansionPanels>
+
+            <MudStack Row="true" Spacing="2" Class="mt-2">
+                <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="GeneratePrompt" StartIcon="@Icons.Material.Filled.PlayArrow">Generate</MudButton>
+                <MudButton Disabled="@string.IsNullOrEmpty(_prompt)" Variant="Variant.Outlined" OnClick="CopyPrompt" StartIcon="@Icons.Material.Filled.ContentCopy">Copy</MudButton>
+                <MudButton Disabled="@string.IsNullOrEmpty(_prompt)" Variant="Variant.Outlined" OnClick="DownloadFiles" StartIcon="@Icons.Material.Filled.Download">Download</MudButton>
+            </MudStack>
+        </MudStack>
+    </MudPaper>
+
+    <MudPaper Class="pa-4" Elevation="1">
+        <MudText Typo="Typo.h6" Class="mb-2">Generated Prompt</MudText>
+        @if (string.IsNullOrEmpty(_prompt))
+        {
+            <MudText Color="Color.Default">Fill the form and click Generate.</MudText>
+        }
+        else
+        {
+            <MudTextField Lines="15" FullWidth="true" ReadOnly="true" Value="_prompt" />
+        }
+
+        @if (!string.IsNullOrEmpty(_pacesJson))
+        {
+            <MudDivider Class="my-4" />
+            <MudText Typo="Typo.subtitle2">paces.json preview</MudText>
+            <MudCodeHighlight Code="_pacesJson" Language="json" />
+        }
+    </MudPaper>
+</MudContainer>
+
+@code {
+    private Athlete? _athlete;
+    private readonly PlanPromptParameters _parameters = new();
+    private string _prompt = string.Empty;
+    private string _pacesJson = string.Empty;
+    private bool _loading;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _athlete = await AthleteSession.GetAsync();
+            if (_athlete is null)
+            {
+                Snackbar.Add("No athlete data found. Configure athlete first.", Severity.Warning);
+            }
+            StateHasChanged();
+        }
+    }
+
+    private async Task GeneratePrompt()
+    {
+        if (_loading) return;
+        if (_athlete is null)
+        {
+            Snackbar.Add("Cannot generate: athlete not set.", Severity.Error);
+            return;
+        }
+        if (!_parameters.IsValid(out var err))
+        {
+            Snackbar.Add(err!, Severity.Error);
+            return;
+        }
+
+        try
+        {
+            _loading = true;
+            _prompt = PromptBuilder.BuildPrompt(_athlete, _parameters);
+            _pacesJson = PromptBuilder.BuildPacesJson(_athlete);
+            Snackbar.Add("Prompt generated.", Severity.Success);
+        }
+        catch (ArgumentException ex)
+        {
+            Snackbar.Add("Invalid input: " + ex.Message, Severity.Error);
+        }
+        catch (InvalidOperationException ex)
+        {
+            Snackbar.Add("Operation error: " + ex.Message, Severity.Error);
+        }
+        catch (Exception)
+        {
+            Snackbar.Add("An unexpected error occurred while generating the prompt.", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task CopyPrompt()
+    {
+        if (string.IsNullOrEmpty(_prompt)) return;
+        await ClipboardCopyAsync(_prompt);
+        Snackbar.Add("Prompt copied to clipboard.", Severity.Info);
+    }
+
+    private async Task DownloadFiles()
+    {
+        if (string.IsNullOrEmpty(_prompt)) return;
+        await DownloadFileAsync("training_prompt.txt", "text/plain", _prompt);
+        await DownloadFileAsync("paces.json", "application/json", _pacesJson);
+        Snackbar.Add("Files downloaded.", Severity.Success);
+    }
+
+    private ValueTask ClipboardCopyAsync(string text)
+        => JS.InvokeVoidAsync("navigator.clipboard.writeText", text);
+
+    private async ValueTask DownloadFileAsync(string filename, string contentType, string content)
+    {
+        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+        var base64 = Convert.ToBase64String(bytes);
+        var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
+
+        await module.InvokeVoidAsync("downloadFileFromBytes", filename, contentType, base64);
+    }
+}

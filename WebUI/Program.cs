@@ -33,6 +33,9 @@ builder.Services.AddScoped<IWorkoutMetadataFactory,  WorkoutMetadataFactory>();
 
 builder.Services.AddScoped<IPlanningBuilder, PlanningBuilder>();
 
+// Prompt builder service
+builder.Services.AddScoped<IPlanPromptBuilder, PlanPromptBuilder>();
+
 // Register typed client for PaceCalculator.API
 builder.Services.AddPaceCalculatorApi(builder.Configuration);
 

@@ -68,6 +68,21 @@ namespace WebUI.Models
             return new Pace(secs);
         }
 
+        public static Pace FromTimeAndDistance(int seconds, double meters)
+        {
+            if (seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds), "Time must be non-negative.");
+            if (double.IsNaN(meters) || double.IsInfinity(meters) || meters <= 0d)
+                throw new ArgumentOutOfRangeException(nameof(meters), "Distance must be a finite, positive value.");
+
+            var paceSecs = (int)Math.Round(seconds * 1000d / meters, MidpointRounding.AwayFromZero);
+            return new Pace(paceSecs);
+        }
+
+        public static Pace FromTimeAndDistance(TimeSpan time, double meters)
+        {
+            return FromTimeAndDistance((int)time.TotalSeconds, meters);
+        }
+
         public decimal ToMeterPerSeconds() => _totalSeconds == 0 ? 0m : 1000m / _totalSeconds;
         public double ToKmPerHour() => _totalSeconds == 0 ? 0d : 3600d / _totalSeconds;
 

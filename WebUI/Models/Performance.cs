@@ -1,8 +1,15 @@
 ﻿namespace WebUI.Models;
 
-public class Performance
+public interface IPerformance
 {
-    public int DistanceMeters { get; set; }
+    int Distance { get; }
+    Pace Pace { get; }
+}
+
+public class Performance : IPerformance
+{
+    public int Distance { get; set; }
     public int TimeSeconds { get; set; }
     public int ElevationGainMeters { get; set; } = 0;
+    public Pace Pace => Pace.FromTimeAndDistance(TimeSeconds, Distance);
 }
