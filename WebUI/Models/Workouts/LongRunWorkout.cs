@@ -16,6 +16,6 @@ public sealed class LongRunWorkout : StructuredWorkout
         }
     }
 
-    protected override Color CalendarColor => Color.Success;
-    protected override string EventLabel => "Long Run";
+    public override Color CalendarColor => Color.Success;
+    public override string EventLabel => "Long Run";
 }

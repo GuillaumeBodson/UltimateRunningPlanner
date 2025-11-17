@@ -13,6 +13,6 @@ public sealed class DefaultWorkout : PlannedWorkout
         }
     }
 
-    protected override Color CalendarColor => Color.Secondary;
-    protected override string EventLabel => "Other";
+    public override Color CalendarColor => Color.Secondary;
+    public override string EventLabel => "Other";
 }

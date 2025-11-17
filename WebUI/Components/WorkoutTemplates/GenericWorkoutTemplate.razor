@@ -1,0 +1,28 @@
+@using System.MudPlanner
+@using WebUI.Models
+@using WebUI.Models.Workouts
+@using MudBlazor
+
+<MudStack Spacing="1">
+    <MudText Typo="Typo.h6">@Event.Title</MudText>
+    @if (!string.IsNullOrWhiteSpace(Event.Description))
+    {
+        <MudText Typo="Typo.body2" Class="text-muted">@Event.Description</MudText>
+    }
+    @if (Workout is not null)
+    {
+        <MudText Typo="Typo.body2">
+            @Workout.RunType • @Math.Round(Workout.EstimatedDistance / 1000.0, 1) km • @FormatDuration(Workout.EstimatedTime)
+            Pace: @Workout.Pace.ToString()
+        </MudText>
+    }
+</MudStack>
+
+@code {
+    [Parameter] public CalendarEvent Event { get; set; } = default!;
+    [Parameter] public PlannedWorkout? Workout { get; set; }
+    [Parameter] public Athlete Athlete { get; set; } = default!;
+
+    private static string FormatDuration(int seconds)
+        => TimeSpan.FromSeconds(seconds).ToString("h\\:mm\\:ss");
+}

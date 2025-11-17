@@ -6,6 +6,7 @@
 @using BlazorLibraries.MudPlanner
 @using GarminRunerz.Workout.Services.Models
 @using Toolbox.Utilities
+@using WebUI.Components.WorkoutTemplates
 @using WebUI.Mappers
 @using WebUI.Models
 @using WebUI.Models.Workouts
@@ -18,15 +19,47 @@
 @inject ISnackbar Snackbar
 @inject ILogger<CalendarPage> Logger
 @inject ISession<Planning> PlanningSession
+@inject IWorkoutTemplateSelector TemplateSelector
+
 
 <PageTitle>Calendar</PageTitle>
 <MudContainer MaxWidth="MaxWidth.Large" Class="py-6">
     <MudText Typo="Typo.h3" Color="Color.Primary" Class="page-title mb-3">Calendar</MudText>
 
     <CalendarComponent @bind-Planning="CalendarEvents" @bind-WeekRecaps="WeekRecaps" HasWeekRecap="true"
+                       @ref="_calendar"
                        OnPlanningSaveCallback="PlanningSave"
                        CreateEventAsync="CreateEventAsync"
-                       RemoveEventAsync="RemoveEventAsync" />
+                       RemoveEventAsync="RemoveEventAsync" >
+        <SelectedEventTemplate Context="ev">
+
+            @{
+                var workout = _planning?.Workouts.FirstOrDefault(w => w.Id == ev.Id);
+                var componentType = workout is not null
+                ? TemplateSelector.Select(workout)
+                : typeof(GenericWorkoutTemplate);
+
+                var parameters = new Dictionary<string, object?>
+                {
+                    ["Event"] = ev,
+                    ["Workout"] = workout,
+                    ["Athlete"] = _athlete
+                };
+            }
+
+            <DynamicComponent Type="componentType" Parameters="parameters" />
+
+            <MudStack Spacing="1">
+
+                <MudStack Row="true" Spacing="1">
+                    <MudButton Color="Color.Error" Variant="Variant.Outlined"
+                               OnClick="@(async () => await _calendar?.RemoveEventAndCloseAsync(ev))">
+                        Delete
+                    </MudButton>
+                </MudStack>
+            </MudStack>
+        </SelectedEventTemplate>
+                   </CalendarComponent>
 
 </MudContainer>
 
@@ -36,6 +69,7 @@
     public ObservableCollection<WeekRecap> WeekRecaps { get; set; } = [];
     private Planning? _planning;
     private Athlete? _athlete;
+    private BlazorLibraries.MudPlanner.CalendarComponent? _calendar;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
