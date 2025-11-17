@@ -10,8 +10,7 @@
 @inject IJSRuntime JS
 @inject IWorkoutMetadataFactory WorkoutMetadataFactory
 @inject IWorkoutGeneratorService WorkoutGeneratorService
-
-
+@inject ISnackbar Snackbar
 
 
 <MudStack Spacing="1">
@@ -27,7 +26,7 @@
     @if (!Workout.IsEmpty)
     {
         <MudText Typo="Typo.body2">
-            @Workout.StringifyDetails()>
+            @Workout.StringifyDetails()
         </MudText>
 
         <MudButton Variant="Variant.Filled"
@@ -50,17 +49,24 @@
 
     private async Task DownloadWorkoutsAsync()
     {
-        var customWorkout = Workout.ToCustomWorkout();
-        var workoutPreferences = Athlete!.AthletePreferences.GetPreferencesForRunType(Workout.RunType);
+        try
+        {
+            var customWorkout = Workout.ToCustomWorkout();
+            var workoutPreferences = Athlete.AthletePreferences.GetPreferencesForRunType(Workout.RunType);
 
-        var metadata = WorkoutMetadataFactory.Create(Workout, Athlete, workoutPreferences);
-        Workout garminWorkout = WorkoutGeneratorService.GenerateWorkoutsFromPlanning(customWorkout, metadata);
-        var content = JsonSerializer.Serialize(garminWorkout);
-        var bytes = System.Text.Encoding.UTF8.GetBytes(content);
-        var base64 = Convert.ToBase64String(bytes);
-        var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
-        var filename = $"w{Workout.WeekNumber}-{Workout.RunType}.json";
+            var metadata = WorkoutMetadataFactory.Create(Workout, Athlete, workoutPreferences);
+            Workout garminWorkout = WorkoutGeneratorService.GenerateWorkoutsFromPlanning(customWorkout, metadata);
+            var content = JsonSerializer.Serialize(garminWorkout);
+            var bytes = System.Text.Encoding.UTF8.GetBytes(content);
+            var base64 = Convert.ToBase64String(bytes);
+            var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/download.js");
+            var filename = $"w{Workout.WeekNumber}-{Workout.RunType}.json";
 
-        await module.InvokeVoidAsync("downloadFileFromBytes", filename, "application/json", base64);
+            await module.InvokeVoidAsync("downloadFileFromBytes", filename, "application/json", base64);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An error occurred while downloading the workout: {ex.Message}", Severity.Error);
+        }
     }
 }
