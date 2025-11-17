@@ -39,6 +39,8 @@ builder.Services.AddScoped<IPlanPromptBuilder, PlanPromptBuilder>();
 // Register typed client for PaceCalculator.API
 builder.Services.AddPaceCalculatorApi(builder.Configuration);
 
+builder.Services.AddSingleton<IWorkoutTemplateSelector, WorkoutTemplateSelector>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

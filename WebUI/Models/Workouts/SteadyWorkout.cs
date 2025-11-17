@@ -16,6 +16,6 @@ public sealed class SteadyWorkout : StructuredWorkout
         }
     }
 
-    protected override Color CalendarColor => Color.Info;
-    protected override string EventLabel => "Steady";
+    public override Color CalendarColor => Color.Info;
+    public override string EventLabel => "Steady";
 }

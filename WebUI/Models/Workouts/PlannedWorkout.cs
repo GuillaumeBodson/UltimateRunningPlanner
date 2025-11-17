@@ -24,8 +24,8 @@ public abstract class PlannedWorkout
     /// </summary>
     public abstract string Name { get; }
 
-    protected abstract Color CalendarColor { get; }
-    protected abstract string EventLabel { get; }
+    public abstract Color CalendarColor { get; }
+    public abstract string EventLabel { get; }
 
     // New estimation methods
     /// <summary>

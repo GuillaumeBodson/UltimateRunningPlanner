@@ -70,7 +70,7 @@ public abstract class StructuredWorkout : PlannedWorkout, IStructuredWorkout
     {
         if (IsEmpty)
         {
-            return 0;
+            return TotalDuration;
         }
         int duration = 0;
         foreach (var detail in DetailsCollection!)

@@ -14,6 +14,6 @@ public sealed class EasyWorkout : PlannedWorkout
         }
     }
 
-    protected override Color CalendarColor => Color.Info;
-    protected override string EventLabel => "Easy";
+    public override Color CalendarColor => Color.Info;
+    public override string EventLabel => "Easy";
 }
