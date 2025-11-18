@@ -194,7 +194,7 @@
         var list = Performances ??= new List<Performance>();
         await PerformancesChanged.InvokeAsync(list);
 
-        var result = await _paceCalculationService.CalculatePacesForStandardDistancesAsync([.. list]);
-        await OnPaceFetched.InvokeAsync(result);
+        //var result = await _paceCalculationService.CalculatePacesForStandardDistancesAsync([.. list]);
+        //await OnPaceFetched.InvokeAsync(result);
     }
 }
