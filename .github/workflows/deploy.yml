@@ -30,8 +30,7 @@ jobs:
           server-password: ${{ secrets.SERVER_PASSWORD }}
 
       - name: clean ouput folder
-        run: |
-          rm -rf ./publish
+        run: Remove-Item -Recurse -Force ./publish
 
       - name: Build RunGuesserAPI
         run: dotnet build .\PaceCalculator.API\PaceCalculator.API.csproj -c Release --no-restore
