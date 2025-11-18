@@ -1,0 +1,48 @@
+name: Build, publish and deploy to MonsterASP.NET
+on: [push]
+
+jobs:
+  build_and_deploy:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0
+          
+      - name: Install dependencies
+        run: dotnet restore
+        
+      - name: Build WebUI
+        run: dotnet build .\WebUI\WebUI.csproj -c Release --no-restore
+
+      - name: Publish WebUI
+        run: dotnet publish .\WebUI\WebUI.csproj --configuration Release --output ./publish --runtime win-x86 
+
+      - name: Deploy WebUI to MonsterASP.NET via WebDeploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ secrets.WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.SERVER_USERNAME }}
+          server-password: ${{ secrets.SERVER_PASSWORD }}
+
+      - name: clean ouput folder
+        run: |
+          rm -rf ./publish
+
+      - name: Build RunGuesserAPI
+        run: dotnet build .\PaceCalculator.API\PaceCalculator.API.csproj -c Release --no-restore
+
+      - name: Publish RunGuesserAPI
+        run: dotnet publish .\PaceCalculator.API\PaceCalculator.API.csproj --configuration Release --output ./publish --runtime win-x86 
+
+      - name: Deploy RunGuesserAPI to MonsterASP.NET via WebDeploy
+        uses: rasmusbuchholdt/simply-web-deploy@2.1.0
+        with:
+          website-name: ${{ secrets.PaceCalculator_WEBSITE_NAME }}
+          server-computer-name: ${{ secrets.PaceCalculator_SERVER_COMPUTER_NAME }}
+          server-username: ${{ secrets.PaceCalculator_SERVER_USERNAME }}
+          server-password: ${{ secrets.PaceCalculator_SERVER_PASSWORD }}
