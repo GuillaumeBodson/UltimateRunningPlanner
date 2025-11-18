@@ -34,7 +34,7 @@ builder.Services.AddScoped<IWorkoutMetadataFactory,  WorkoutMetadataFactory>();
 builder.Services.AddScoped<IPlanningBuilder, PlanningBuilder>();
 
 // Register typed client for PaceCalculator.API
-//builder.Services.AddPaceCalculatorApi(builder.Configuration);
+builder.Services.AddPaceCalculatorApi(builder.Configuration);
 
 var app = builder.Build();
 
