@@ -1,4 +1,4 @@
-# UltimateRunningPlanner Copilot Instructions
+# AGENTS - UltimateRunningPlanner Copilot Instructions
 
 Scope
 - Use these instructions when performing code reviews, suggestions, or automated refactors.
